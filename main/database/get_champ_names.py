@@ -13,7 +13,7 @@ champion_names = []
 for champ in data:
     if champ == "MonkeyKing":
         champ = "Wukong"
-    champion_names += [champ]
+    champion_names += [champ.lower()]
     # champion_names += [data[champ]['name']]
 
 with open("../content/champion_names.json", "w+") as file:
