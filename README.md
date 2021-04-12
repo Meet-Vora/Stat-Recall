@@ -24,3 +24,7 @@
 ### Create classes to represent champions/items/debuffs
 
 ###
+
+# Extra Features
+
+1. estimate how long a team comp takes to do baron
