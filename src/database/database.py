@@ -22,7 +22,9 @@ class Database:
         self.cursor.execute(command)
 
     def create_champion_metadata_table(self):
-        schema = """CREATE TABLE IF NOT EXISTS champion_metadata(
+        schema = """
+        CREATE TABLE IF NOT EXISTS champion_metadata
+        (
             id INTEGER NOT NULL, 
             key TEXT NOT NULL PRIMARY KEY, 
             name TEXT NOT NULL,
@@ -32,12 +34,14 @@ class Database:
             resource TEXT NOT NULL,
             attackType TEXT NOT NULL,
             adaptiveType TEXT NOT NULL
-            )
-            """
+        )
+        """
         self.__db_execute(schema)
 
     def create_champion_stats_table(self):
-        schema = """CREATE TABLE IF NOT EXISTS champion_base_stats(
+        schema = """
+        CREATE TABLE IF NOT EXISTS champion_base_stats
+        (
             key TEXT NOT NULL,
             statName TEXT NOT NULL,
             flat INTEGER NOT NULL,
@@ -45,12 +49,12 @@ class Database:
             perLevel INTEGER NOT NULL,
             percentPerLevel INTEGER NOT NULL,
             FOREIGN KEY(key) REFERENCES champion_metadata(key)
-            )
-            """
+        )
+        """
         self.__db_execute(schema)
 
     def write_all_champion_metadata(self):
-        for champion_name in champion_names:
+        for champion_name in champion_names['champion']:
             self.__write_champion_metadata(champion_name)
 
         self.conn.commit()
