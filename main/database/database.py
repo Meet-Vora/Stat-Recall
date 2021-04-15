@@ -1,7 +1,6 @@
 import sqlite3
 import requests
 
-
 class Database:
 
     def __init__(self, auto_commit=True):
