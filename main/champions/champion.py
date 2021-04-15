@@ -1,5 +1,6 @@
 from database import Database
 from itemslots import Itemslots
+from item import Item
 
 class Champion: 
     def __init__(self, champion_name):
