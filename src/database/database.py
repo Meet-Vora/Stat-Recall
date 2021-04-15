@@ -6,12 +6,14 @@ import os
 
 class Database:
 
-    def __init__(self, patch, auto_commit=True):
+    def __init__(self, patch="latest", auto_commit=True):
         self.patch = patch
         self.auto_commit = auto_commit
+
         self.database_name = "database.db"
         self.conn = sqlite3.connect(database_name)
         self.cursor = conn.cursor()
+
         self.base_url = "http://cdn.merakianalytics.com/riot/lol/resources/{}/en-US".format(
             self.patch)
         self.champ_names_path = os.path.join(os.path.dirname(
@@ -29,6 +31,7 @@ class Database:
             self.cursor.execute(command)
 
         self.cursor.executemany(command, values)
+        self.conn.commit()
 
     def create_champion_metadata_table(self):
         schema = """
@@ -180,13 +183,11 @@ class Database:
 
     def write_all_champion_metadata(self):
         with open(self.champ_names_path, "r") as file:
-            champion_names = json.load(file)['champion']
+            champion_names = json.load(file)['champions']
             for champion_name in champion_names:
-                self.__write_champion_metadata(champion_name)
+                self.write_champion_metadata(champion_name)
 
-        self.conn.commit()
-
-    def __write_champion_metadata(self, champion_name):
+    def write_champion_metadata(self, champion_name):
         url = self.base_url + "/champions/" + champion_name + ".json"
         request_data = self.__get_http_request(url).json()
         insert_command = "INSERT INTO champion_metadata VALUES (?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE"
@@ -195,10 +196,10 @@ class Database:
                   request_data['attackType'], request_data['adaptiveType']]
         self.__db_execute(insert_command, values)
 
-    def write_all_champion_stats(self, champion_name):
+    def write_all_champion_stats(self):
         pass
 
-    def __write_champion_stats(self, champion_name):
+    def write_champion_stats(self, champion_name):
         pass
 
     ### Read from tables in database ###
