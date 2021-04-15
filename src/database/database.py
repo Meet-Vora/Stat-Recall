@@ -11,16 +11,22 @@ class Database:
         self.auto_commit = auto_commit
 
         self.database_name = "database.db"
-        self.conn = sqlite3.connect(database_name)
-        self.cursor = conn.cursor()
+        self.conn = sqlite3.connect(self.database_name)
+        self.cursor = self.conn.cursor()
 
         self.base_url = "http://cdn.merakianalytics.com/riot/lol/resources/{}/en-US".format(
             self.patch)
         self.champ_names_path = os.path.join(os.path.dirname(
             __file__), '../content/champion_names.json')
 
-    def __get_http_request(self):
-        pass
+        self.stat_names_path = os.path.join(os.path.dirname(
+            __file__), '../content/stat_names.json')
+        
+
+    def __get_http_request(self, url):
+        response = requests.get(url)
+        print(url)
+        return response
 
     ### Create and write to tables in database ###
     def __db_execute(self, command, values=[]):
@@ -32,6 +38,22 @@ class Database:
 
         self.cursor.executemany(command, values)
         self.conn.commit()
+
+    def drop_champ_metadata_table(self):
+        schema = """
+        DROP TABLE IF EXISTS champion_metadata
+
+        """
+        self.__db_execute(schema)
+
+    def drop_champ_basestat_table(self):
+        schema = """
+        DROP TABLE IF EXISTS champion_base_stats
+
+        """
+        self.__db_execute(schema)
+
+    
 
     def create_champion_metadata_table(self):
         schema = """
@@ -188,19 +210,41 @@ class Database:
                 self.write_champion_metadata(champion_name)
 
     def write_champion_metadata(self, champion_name):
-        url = self.base_url + "/champions/" + champion_name + ".json"
+        url_name = "MonkeyKing" if champion_name == "Wukong" else champion_name
+
+        url = self.base_url + "/champions/" + url_name + ".json"
         request_data = self.__get_http_request(url).json()
-        insert_command = "INSERT INTO champion_metadata VALUES (?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE"
-        values = [request_data['id'], request_data['key'], request_data['name'], request_data['title'],
+        insert_command = "INSERT INTO champion_metadata VALUES (?,?,?,?,?,?,?,?,?)"
+        values = [(request_data['id'], request_data['key'], champion_name, request_data['title'],
                   request_data['fullName'], request_data['icon'], request_data['resource'],
-                  request_data['attackType'], request_data['adaptiveType']]
+                  request_data['attackType'], request_data['adaptiveType'])]
         self.__db_execute(insert_command, values)
 
     def write_all_champion_stats(self):
-        pass
+        with open(self.champ_names_path, "r") as file:
+            champion_names = json.load(file)['champions']
+            for champion_name in champion_names:
+                self.write_champion_stats(champion_name)
+
 
     def write_champion_stats(self, champion_name):
-        pass
+        url_name = "MonkeyKing" if champion_name == "Wukong" else champion_name
+
+        url = self.base_url + "/champions/" + url_name + ".json"
+        request_data = self.__get_http_request(url).json()
+
+        num_of_stats = len(request_data["stats"])
+        print(num_of_stats)
+        stat_schema_insert = "(" + "?," * (num_of_stats * 4) - 1 + "?" + ")"
+
+        insert_command = "INSERT INTO champion_base_stats VALUES " + stat_schema_insert
+        print(insert_command)
+        return
+        # values = [(request_data['id'], request_data['key'], champion_name, request_data['title'],
+        #           request_data['fullName'], request_data['icon'], request_data['resource'],
+        #           request_data['attackType'], request_data['adaptiveType'])]
+        # self.__db_execute(insert_command, values)
+        
 
     ### Read from tables in database ###
 
@@ -237,3 +281,14 @@ class Database:
 
     def close(self):
         self.conn.close()
+
+    
+if __name__ == '__main__':
+    database = Database()
+    # database.drop_champ_metadata_table()
+    # database.drop_champ_basestat_table()
+    # database.create_champion_metadata_table()
+    # database.create_champion_stats_table()
+    # database.write_all_champion_metadata()
+    database.write_all_champion_stats()
+    database.close()
