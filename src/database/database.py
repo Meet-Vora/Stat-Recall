@@ -200,7 +200,7 @@ class Database:
         """
         self.__db_execute(schema)
 
-    def write_all_champion_metadata(self):
+    def write_all_champions_metadata(self):
         with open(self.champ_names_path, "r") as file:
             champion_names = json.load(file)['champions']
             for champion_name in champion_names:
@@ -217,19 +217,41 @@ class Database:
                    request_data['attackType'], request_data['adaptiveType'])]
         self.__db_execute(insert_command, values)
 
-    def write_all_champion_stats(self):
+    def write_all_champions_stats(self):
         with open(self.champ_names_path, "r") as file:
             champion_names = json.load(file)['champions']
             for champion_name in champion_names:
                 self.write_champion_stats(champion_name)
 
     def write_champion_stats(self, champion_name):
-        url_name = "MonkeyKing" if champion_name == "wukong" else champion_name
-        return
-        # values = [(request_data['id'], request_data['key'], champion_name, request_data['title'],
-        #           request_data['fullName'], request_data['icon'], request_data['resource'],
-        #           request_data['attackType'], request_data['adaptiveType'])]
-        # self.__db_execute(insert_command, values)
+        url = self.base_url + "/champions/" + champion_name + ".json"
+        request_data = self.__get_http_request(url).json()
+        insert_command = """INSERT INTO champion_metadata VALUES 
+        (
+            ?,
+            ?,?,?,?,
+            ?,?,?,?,
+            ?,?,?,?,
+            ?,?,?,?,
+            ?,?,?,?,
+            ?,?,?,?,
+            ?,?,?,?,
+            ?,?,?,?,
+            ?,?,?,?,
+            ?,?,?,?,
+            ?,?,?,?,
+            ?,?,?,?,
+            ?,?,?,?,
+            ?,?,?,?,
+            ?,?,?,?,
+            ?,?,?,?,
+            ?,?,?,?,
+            ?,?,?,?,
+            ?,?,?,?,
+            ?,?,?,?,
+        ) 
+        ON DUPLICATE KEY UPDATE
+        """
 
     ### Read from tables in database ###
 
