@@ -21,7 +21,6 @@ class Database:
 
         self.stat_names_path = os.path.join(os.path.dirname(
             __file__), '../content/stat_names.json')
-        
 
     def __get_http_request(self, url):
         response = requests.get(url)
@@ -52,8 +51,6 @@ class Database:
 
         """
         self.__db_execute(schema)
-
-    
 
     def create_champion_metadata_table(self):
         schema = """
@@ -216,8 +213,8 @@ class Database:
         request_data = self.__get_http_request(url).json()
         insert_command = "INSERT INTO champion_metadata VALUES (?,?,?,?,?,?,?,?,?)"
         values = [(request_data['id'], request_data['key'], champion_name, request_data['title'],
-                  request_data['fullName'], request_data['icon'], request_data['resource'],
-                  request_data['attackType'], request_data['adaptiveType'])]
+                   request_data['fullName'], request_data['icon'], request_data['resource'],
+                   request_data['attackType'], request_data['adaptiveType'])]
         self.__db_execute(insert_command, values)
 
     def write_all_champion_stats(self):
@@ -226,25 +223,13 @@ class Database:
             for champion_name in champion_names:
                 self.write_champion_stats(champion_name)
 
-
     def write_champion_stats(self, champion_name):
-        url_name = "MonkeyKing" if champion_name == "Wukong" else champion_name
-
-        url = self.base_url + "/champions/" + url_name + ".json"
-        request_data = self.__get_http_request(url).json()
-
-        num_of_stats = len(request_data["stats"])
-        print(num_of_stats)
-        stat_schema_insert = "(" + "?," * (num_of_stats * 4) - 1 + "?" + ")"
-
-        insert_command = "INSERT INTO champion_base_stats VALUES " + stat_schema_insert
-        print(insert_command)
+        url_name = "MonkeyKing" if champion_name == "wukong" else champion_name
         return
         # values = [(request_data['id'], request_data['key'], champion_name, request_data['title'],
         #           request_data['fullName'], request_data['icon'], request_data['resource'],
         #           request_data['attackType'], request_data['adaptiveType'])]
         # self.__db_execute(insert_command, values)
-        
 
     ### Read from tables in database ###
 
@@ -282,7 +267,7 @@ class Database:
     def close(self):
         self.conn.close()
 
-    
+
 if __name__ == '__main__':
     database = Database()
     # database.drop_champ_metadata_table()
@@ -292,3 +277,10 @@ if __name__ == '__main__':
     # database.write_all_champion_metadata()
     database.write_all_champion_stats()
     database.close()
+
+
+data["health"]
+data["healthFlat"]
+data["healthPercent"]
+data["healthPerLevel"]
+data["healthPercentPerLevel"]
