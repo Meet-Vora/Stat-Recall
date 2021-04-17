@@ -41,6 +41,19 @@ class Database:
         self.cursor.executemany(command, values)
         self.conn.commit()
 
+    def __open_champion_names_json(self, write_metadata=False, write_stats=False, read_metadata=False, read_stats=False):
+        with open(self.champ_names_path, "r") as file:
+            champion_names = json.load(file)['champions']
+            for champion_name in champion_names:
+                if write_metadata:
+                    self.write_champion_metadata(champion_name)
+                if write_stats:
+                    self.write_champion_stats(champion_name)
+                if read_metadata:
+                    self.get_champion_metadata(champion_name)
+                if read_stats:
+                    self.get_champion_stats(champion_name)
+
     def drop_champ_metadata_table(self):
         schema = """
         DROP TABLE IF EXISTS champion_metadata
@@ -59,8 +72,8 @@ class Database:
         schema = """
         CREATE TABLE IF NOT EXISTS champion_metadata
         (
-            id INTEGER NOT NULL, 
-            key TEXT NOT NULL PRIMARY KEY, 
+            id INTEGER NOT NULL,
+            key TEXT NOT NULL PRIMARY KEY,
             name TEXT NOT NULL,
             title TEXT NOT NULL,
             fullName TEXT NOT NULL,
@@ -92,7 +105,7 @@ class Database:
             manaPercent INTEGER NOT NULL,
             manaPerLevel INTEGER NOT NULL,
             manaPercentPerLevel INTEGER NOT NULL,
-            
+
             manaRegenFlat INTEGER NOT NULL,
             manaRegenPercent INTEGER NOT NULL,
             manaRegenPerLevel INTEGER NOT NULL,
@@ -184,29 +197,23 @@ class Database:
         self.__db_execute(schema)
 
     def write_all_champions_metadata(self):
-        with open(self.champ_names_path, "r") as file:
-            champion_names = json.load(file)['champions']
-            for champion_name in champion_names:
-                self.write_champion_metadata(champion_name)
+        self.__open_champion_names_json(write_metadata=True)
 
     def write_champion_metadata(self, champion_name):
         request_data = self.__champion_http_request(champion_name)
         insert_command = "INSERT INTO champion_metadata VALUES (?,?,?,?,?,?,?,?,?)"
-        values = [(request_data['id'], request_data['key'], champion_name, request_data['title'],
+        values = [(request_data['id'], request_data['key'].lower(), champion_name, request_data['title'],
                    request_data['fullName'], request_data['icon'], request_data['resource'],
                    request_data['attackType'], request_data['adaptiveType'])]
 
         self.__db_execute(insert_command, values)
 
     def write_all_champions_stats(self):
-        with open(self.champ_names_path, "r") as file:
-            champion_names = json.load(file)['champions']
-            for champion_name in champion_names:
-                self.write_champion_stats(champion_name)
+        self.__open_champion_names_json(write_stats=True)
 
     def write_champion_stats(self, champion_name):
         request_data = self.__champion_http_request(champion_name)['stats']
-        insert_command = """INSERT INTO champion_metadata VALUES 
+        insert_command = """INSERT INTO champion_metadata VALUES
         (
             ?,
             ?,?,?,?,
@@ -229,7 +236,7 @@ class Database:
             ?,?,?,?,
             ?,?,?,?,
             ?,?,?,?,
-        ) 
+        )
         ON DUPLICATE KEY UPDATE
         """
         values = [
@@ -344,26 +351,30 @@ class Database:
         Return:
         all champion metadata in a python dictionary
         """
-        pass
+        self.__open_champion_names_json(read_metadata=True)
 
     def get_all_champion_stats(self):
         """
         Return:
         all champion stat data in a python dictionary
         """
-        pass
+        self.__open_champion_names_json(read_stats=True)
 
     def get_champion_metadata(self, champion_name):
         """
         Return:
-        champion data in a python dictionary
+        champion metadata in a python dictionary
         """
+        select_command = "SELECT * FROM champion_metadata WHERE key=?"
+        self.__db_execute(select_command, [champion_name])
+        data = self.cursor.fetchall()
+        print(data)
         pass
 
     def get_champion_stats(self, champion_name):
         """
         Return:
-        champion data in a python dictionary
+        champion base stats data in a python dictionary
         """
         pass
 
