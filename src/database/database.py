@@ -10,7 +10,9 @@ class Database:
         self.patch = patch
         self.auto_commit = auto_commit
 
-        self.database_name = "database.db"
+        # self.database_name = "database.db"
+        self.database_name = os.path.join(os.path.dirname(
+            __file__), './database.db')
         self.conn = sqlite3.connect(self.database_name)
         self.cursor = self.conn.cursor()
 
@@ -37,8 +39,11 @@ class Database:
         """
         if not values:
             self.cursor.execute(command)
+        elif len(values) == 1:
+            self.cursor.execute(command, values)
+        else:
+            self.cursor.executemany(command, values)
 
-        self.cursor.executemany(command, values)
         self.conn.commit()
 
     def __open_champion_names_json(self, write_metadata=False, write_stats=False, read_metadata=False, read_stats=False):
@@ -202,9 +207,18 @@ class Database:
     def write_champion_metadata(self, champion_name):
         request_data = self.__champion_http_request(champion_name)
         insert_command = "INSERT INTO champion_metadata VALUES (?,?,?,?,?,?,?,?,?)"
-        values = [(request_data['id'], request_data['key'].lower(), champion_name, request_data['title'],
-                   request_data['fullName'], request_data['icon'], request_data['resource'],
-                   request_data['attackType'], request_data['adaptiveType'])]
+        values = [request_data['id'], request_data['key'].lower(), champion_name, request_data['title'],
+                  request_data['fullName'], request_data['icon'], request_data['resource'],
+                  request_data['attackType'], request_data['adaptiveType']]
+        # print(type(request_data['id']))
+        # print(type(champion_name))
+        # print(type(request_data['key']))
+        # print(type(request_data['title']))
+        # print(type(request_data['fullName']))
+        # print(type(request_data['icon']))
+        # print(type(request_data['resource']))
+        # print(type(request_data['attackType']))
+        # print(type(request_data['adaptiveType']))
 
         self.__db_execute(insert_command, values)
 
@@ -241,105 +255,105 @@ class Database:
         """
         values = [
 
-            request_data['healthFlat'],
-            request_data['healthPercent'],
-            request_data['healthPerLevel'],
-            request_data['healthPercentPerLevel'],
+            request_data['health']['flat'],
+            request_data['health']['percent'],
+            request_data['health']['perLevel'],
+            request_data['health']['percentPerLevel'],
 
-            request_data['healthRegenFlat'],
-            request_data['healthRegenPercent'],
-            request_data['healthRegenPerLevel'],
-            request_data['healthRegenPercentPerLevel'],
+            request_data['healthRegen']['flat'],
+            request_data['healthRegen']['percent'],
+            request_data['healthRegen']['perLevel'],
+            request_data['healthRegen']['percentPerLevel'],
 
-            request_data['manaFlat'],
-            request_data['manaPercent'],
-            request_data['manaPerLevel'],
-            request_data['manaPercentPerLevel'],
+            request_data['mana']['flat'],
+            request_data['mana']['percent'],
+            request_data['mana']['perLevel'],
+            request_data['mana']['percentPerLevel'],
 
-            request_data['manaRegenFlat'],
-            request_data['manaRegenPercent'],
-            request_data['manaRegenPerLevel'],
-            request_data['manaRegenPercentPerLevel'],
+            request_data['manaRegen']['flat'],
+            request_data['manaRegen']['percent'],
+            request_data['manaRegen']['perLevel'],
+            request_data['manaRegen']['percentPerLevel'],
 
-            request_data['armorFlat'],
-            request_data['armorPercent'],
-            request_data['armorPerLevel'],
-            request_data['armorPercentPerLevel'],
+            request_data['armor']['flat'],
+            request_data['armor']['percent'],
+            request_data['armor']['perLevel'],
+            request_data['armor']['percentPerLevel'],
 
-            request_data['magicResistanceFlat'],
-            request_data['magicResistancePercent'],
-            request_data['magicResistancePerLevel'],
-            request_data['magicResistancePercentPerLevel'],
+            request_data['magicResistance']['flat'],
+            request_data['magicResistance']['percent'],
+            request_data['magicResistance']['perLevel'],
+            request_data['magicResistance']['percentPerLevel'],
 
-            request_data['attackDamageFlat'],
-            request_data['attackDamagePercent'],
-            request_data['attackDamagePerLevel'],
-            request_data['attackDamagePercentPerLevel'],
+            request_data['attackDamage']['flat'],
+            request_data['attackDamage']['percent'],
+            request_data['attackDamage']['perLevel'],
+            request_data['attackDamage']['percentPerLevel'],
 
-            request_data['movespeedFlat'],
-            request_data['movespeedPercent'],
-            request_data['movespeedPerLevel'],
-            request_data['movespeedPercentPerLevel'],
+            request_data['movespeed']['flat'],
+            request_data['movespeed']['percent'],
+            request_data['movespeed']['perLevel'],
+            request_data['movespeed']['percentPerLevel'],
 
-            request_data['acquisitionRadiusFlat'],
-            request_data['acquisitionRadiusPercent'],
-            request_data['acquisitionRadiusPerLevel'],
-            request_data['acquisitionRadiusPercentPerLevel'],
+            request_data['acquisitionRadius']['flat'],
+            request_data['acquisitionRadius']['percent'],
+            request_data['acquisitionRadius']['perLevel'],
+            request_data['acquisitionRadius']['percentPerLevel'],
 
-            request_data['selectionRadiusFlat'],
-            request_data['selectionRadiusPercent'],
-            request_data['selectionRadiusPerLevel'],
-            request_data['selectionRadiusPercentPerLevel'],
+            request_data['selectionRadius']['flat'],
+            request_data['selectionRadius']['percent'],
+            request_data['selectionRadius']['perLevel'],
+            request_data['selectionRadius']['percentPerLevel'],
 
-            request_data['pathingRadiusFlat'],
-            request_data['pathingRadiusPercent'],
-            request_data['pathingRadiusPerLevel'],
-            request_data['pathingRadiusPercentPerLevel'],
+            request_data['pathingRadius']['flat'],
+            request_data['pathingRadius']['percent'],
+            request_data['pathingRadius']['perLevel'],
+            request_data['pathingRadius']['percentPerLevel'],
 
-            request_data['gameplayRadiusFlat'],
-            request_data['gameplayRadiusPercent'],
-            request_data['gameplayRadiusPerLevel'],
-            request_data['gameplayRadiusPercentPerLevel'],
+            request_data['gameplayRadius']['flat'],
+            request_data['gameplayRadius']['percent'],
+            request_data['gameplayRadius']['perLevel'],
+            request_data['gameplayRadius']['percentPerLevel'],
 
-            request_data['criticalStrikeDamageFlat'],
-            request_data['criticalStrikeDamagePercent'],
-            request_data['criticalStrikeDamagePerLevel'],
-            request_data['criticalStrikeDamagePercentPerLevel'],
+            request_data['criticalStrikeDamage']['flat'],
+            request_data['criticalStrikeDamage']['percent'],
+            request_data['criticalStrikeDamage']['perLevel'],
+            request_data['criticalStrikeDamage']['percentPerLevel'],
 
-            request_data['criticalStrikeDamageModifierFlat'],
-            request_data['criticalStrikeDamageModifierPercent'],
-            request_data['criticalStrikeDamageModifierPerLevel'],
-            request_data['criticalStrikeDamageModifierPercentPerLevel'],
+            request_data['criticalStrikeDamageModifier']['flat'],
+            request_data['criticalStrikeDamageModifier']['percent'],
+            request_data['criticalStrikeDamageModifier']['perLevel'],
+            request_data['criticalStrikeDamageModifier']['percentPerLevel'],
 
-            request_data['attackSpeedFlat'],
-            request_data['attackSpeedPercent'],
-            request_data['attackSpeedPerLevel'],
-            request_data['attackSpeedPercentPerLevel'],
+            request_data['attackSpeed']['flat'],
+            request_data['attackSpeed']['percent'],
+            request_data['attackSpeed']['perLevel'],
+            request_data['attackSpeed']['percentPerLevel'],
 
-            request_data['attackSpeedRatioFlat'],
-            request_data['attackSpeedRatioPercent'],
-            request_data['attackSpeedRatioPerLevel'],
-            request_data['attackSpeedRatioPercentPerLevel'],
+            request_data['attackSpeedRatio']['flat'],
+            request_data['attackSpeedRatio']['percent'],
+            request_data['attackSpeedRatio']['perLevel'],
+            request_data['attackSpeedRatio']['percentPerLevel'],
 
-            request_data['attackCastTimeFlat'],
-            request_data['attackCastTimePercent'],
-            request_data['attackCastTimePerLevel'],
-            request_data['attackCastTimePercentPerLevel'],
+            request_data['attackCastTime']['flat'],
+            request_data['attackCastTime']['percent'],
+            request_data['attackCastTime']['perLevel'],
+            request_data['attackCastTime']['percentPerLevel'],
 
-            request_data['attackTotalTimeFlat'],
-            request_data['attackTotalTimePercent'],
-            request_data['attackTotalTimePerLevel'],
-            request_data['attackTotalTimePercentPerLevel'],
+            request_data['attackTotalTime']['flat'],
+            request_data['attackTotalTime']['percent'],
+            request_data['attackTotalTime']['perLevel'],
+            request_data['attackTotalTime']['percentPerLevel'],
 
-            request_data['attackDelayOffsetFlat'],
-            request_data['attackDelayOffsetPercent'],
-            request_data['attackDelayOffsetPerLevel'],
-            request_data['attackDelayOffsetPercentPerLevel'],
+            request_data['attackDelayOffset']['flat'],
+            request_data['attackDelayOffset']['percent'],
+            request_data['attackDelayOffset']['perLevel'],
+            request_data['attackDelayOffset']['percentPerLevel'],
 
-            request_data['attackRangeFlat'],
-            request_data['attackRangePercent'],
-            request_data['attackRangePerLevel'],
-            request_data['attackRangePercentPerLevel'],
+            request_data['attackRange']['flat'],
+            request_data['attackRange']['percent'],
+            request_data['attackRange']['perLevel'],
+            request_data['attackRange']['percentPerLevel'],
 
         ]
         self.__db_execute(insert_command, values)
@@ -366,31 +380,26 @@ class Database:
         champion metadata in a python dictionary
         """
         select_command = "SELECT * FROM champion_metadata WHERE key=?"
-        self.__db_execute(select_command, [champion_name])
+        self.__db_execute(select_command, values=[champion_name])
         data = self.cursor.fetchall()
         print(data)
-        pass
 
     def get_champion_stats(self, champion_name):
         """
         Return:
         champion base stats data in a python dictionary
         """
-        pass
-
-    # create_table() method with passed-in schema
-    # read_table() method
 
     def close(self):
         self.conn.close()
 
 
-if __name__ == '__main__':
-    database = Database()
-    # database.drop_champ_metadata_table()
-    # database.drop_champ_basestat_table()
-    # database.create_champion_metadata_table()
-    # database.create_champion_stats_table()
-    # database.write_all_champion_metadata()
-    database.write_all_champion_stats()
-    database.close()
+# if __name__ == '__main__':
+#     database = Database()
+#     # database.drop_champ_metadata_table()
+#     # database.drop_champ_basestat_table()
+#     # database.create_champion_metadata_table()
+#     # database.create_champion_stats_table()
+#     # database.write_all_champion_metadata()
+#     database.write_all_champion_stats()
+#     database.close()
