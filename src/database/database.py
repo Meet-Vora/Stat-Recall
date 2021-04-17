@@ -25,6 +25,11 @@ class Database:
     def __get_http_request(self, url):
         return requests.get(url)
 
+    def __champion_http_request(self, champion_name):
+        url_name = "MonkeyKing" if champion_name == "Wukong" else champion_name
+        url = self.base_url + "/champions/" + url_name + ".json"
+        return self.__get_http_request(url).json()
+
     ### Create and write to tables in database ###
     def __db_execute(self, command, values=[]):
         """
@@ -185,14 +190,12 @@ class Database:
                 self.write_champion_metadata(champion_name)
 
     def write_champion_metadata(self, champion_name):
-        url_name = "MonkeyKing" if champion_name == "Wukong" else champion_name
-
-        url = self.base_url + "/champions/" + url_name + ".json"
-        request_data = self.__get_http_request(url).json()
+        request_data = self.__champion_http_request(champion_name)
         insert_command = "INSERT INTO champion_metadata VALUES (?,?,?,?,?,?,?,?,?)"
         values = [(request_data['id'], request_data['key'], champion_name, request_data['title'],
                    request_data['fullName'], request_data['icon'], request_data['resource'],
                    request_data['attackType'], request_data['adaptiveType'])]
+
         self.__db_execute(insert_command, values)
 
     def write_all_champions_stats(self):
@@ -202,8 +205,7 @@ class Database:
                 self.write_champion_stats(champion_name)
 
     def write_champion_stats(self, champion_name):
-        url = self.base_url + "/champions/" + champion_name + ".json"
-        request_data = self.__get_http_request(url).json()['stats']
+        request_data = self.__champion_http_request(champion_name)['stats']
         insert_command = """INSERT INTO champion_metadata VALUES 
         (
             ?,
