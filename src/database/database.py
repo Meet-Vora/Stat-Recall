@@ -23,9 +23,7 @@ class Database:
             __file__), '../content/stat_names.json')
 
     def __get_http_request(self, url):
-        response = requests.get(url)
-        print(url)
-        return response
+        return requests.get(url)
 
     ### Create and write to tables in database ###
     def __db_execute(self, command, values=[]):
