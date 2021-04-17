@@ -10,9 +10,13 @@ data = requests.get(
     'http://cdn.merakianalytics.com/riot/lol/resources/latest/en-US/champions/Aatrox.json').json()
 
 stat_names = []
+counter = 0
 for statname in data['stats']:
-    for scaletype in data['stats'][statname]:
-        stat_names.append((statname + scaletype).lower())
+    counter += 1
+# for scaletype in data['stats'][statname]:
+#     print((statname + scaletype).lower())
+#     stat_names.append((statname + scaletype).lower())
 
-with open("../content/stat_names.json", "w+") as file:
-    json.dump({"stats": stat_names}, file)
+print(counter)
+# with open("../content/stat_names.json", "w+") as file:
+#     json.dump({"stats": stat_names}, file)
