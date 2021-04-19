@@ -29,7 +29,7 @@ class Database:
         return requests.get(url)
 
     def __champion_http_request(self, champion_name):
-        url_name = "MonkeyKing" if champion_name == "Wukong" else champion_name
+        # url_name = "MonkeyKing" if champion_name == "Wukong" else champion_name
         url = self.base_url + "/champions/" + url_name + ".json"
         return self.__get_http_request(url).json()
 
@@ -364,8 +364,8 @@ class Database:
         all champion stat data in a python dictionary
         """
         data = {}
-        # if not champions:
-        #     champions =
+        if not champions:
+            champions =
         # return self.__open_champion_names_json(read_stats=True)
 
     def get_champion_metadata(self, champion_name):

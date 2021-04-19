@@ -12,9 +12,8 @@ data = requests.get(
 
 champion_names = []
 for champ in data:
-    print(champ)
-    if champ == "MonkeyKing":
-        champ = "Wukong"
+    # if champ == "MonkeyKing":
+    #     champ = "Wukong"
     champion_names += [champ]
     # champion_names += [data[champ]['name']]
 
