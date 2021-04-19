@@ -14,6 +14,7 @@ class Database:
         self.database_name = os.path.join(os.path.dirname(
             __file__), './database.db')
         self.conn = sqlite3.connect(self.database_name)
+        self.conn.row_factory = sqlite3.Row
         self.cursor = self.conn.cursor()
 
         self.base_url = "http://cdn.merakianalytics.com/riot/lol/resources/{}/en-US".format(
@@ -37,16 +38,16 @@ class Database:
         """
         Private helper method for creating tables
         """
-        if not values:
-            self.cursor.execute(command)
-        elif len(values) == 1:
-            self.cursor.execute(command, values)
-        else:
-            self.cursor.executemany(command, values)
+        # if not values:
+        # elif len(values) == 1:
+        #     self.cursor.execute(command, values)
+        # else:
+        #     self.cursor.executemany(command, values)
 
+        self.cursor.execute(command, values)
         self.conn.commit()
 
-    def __open_champion_names_json(self, write_metadata=False, write_stats=False, read_metadata=False, read_stats=False):
+    def __write_champion_names_json(self, write_metadata=False, write_stats=False):
         with open(self.champ_names_path, "r") as file:
             champion_names = json.load(file)['champions']
             for champion_name in champion_names:
@@ -54,10 +55,6 @@ class Database:
                     self.write_champion_metadata(champion_name)
                 if write_stats:
                     self.write_champion_stats(champion_name)
-                if read_metadata:
-                    self.get_champion_metadata(champion_name)
-                if read_stats:
-                    self.get_champion_stats(champion_name)
 
     def drop_champ_metadata_table(self):
         schema = """
@@ -202,32 +199,25 @@ class Database:
         self.__db_execute(schema)
 
     def write_all_champions_metadata(self):
-        self.__open_champion_names_json(write_metadata=True)
+        self.__write_champion_names_json(write_metadata=True)
 
     def write_champion_metadata(self, champion_name):
         request_data = self.__champion_http_request(champion_name)
-        insert_command = "INSERT INTO champion_metadata VALUES (?,?,?,?,?,?,?,?,?)"
+        insert_command = "INSERT OR REPLACE INTO champion_metadata VALUES (?,?,?,?,?,?,?,?,?)"
         values = [request_data['id'], request_data['key'].lower(), champion_name, request_data['title'],
                   request_data['fullName'], request_data['icon'], request_data['resource'],
-                  request_data['attackType'], request_data['adaptiveType']]
-        # print(type(request_data['id']))
-        # print(type(champion_name))
-        # print(type(request_data['key']))
-        # print(type(request_data['title']))
-        # print(type(request_data['fullName']))
-        # print(type(request_data['icon']))
-        # print(type(request_data['resource']))
-        # print(type(request_data['attackType']))
-        # print(type(request_data['adaptiveType']))
+                  request_data['attackType'], request_data['adaptiveType']
+                  ]
 
         self.__db_execute(insert_command, values)
 
     def write_all_champions_stats(self):
-        self.__open_champion_names_json(write_stats=True)
+        self.__write_champion_names_json(write_stats=True)
 
     def write_champion_stats(self, champion_name):
+        key = self.__champion_http_request(champion_name)['key']
         request_data = self.__champion_http_request(champion_name)['stats']
-        insert_command = """INSERT INTO champion_metadata VALUES
+        insert_command = """INSERT OR REPLACE INTO champion_base_stats VALUES
         (
             ?,
             ?,?,?,?,
@@ -249,11 +239,12 @@ class Database:
             ?,?,?,?,
             ?,?,?,?,
             ?,?,?,?,
-            ?,?,?,?,
+            ?,?,?,?
         )
-        ON DUPLICATE KEY UPDATE
         """
         values = [
+
+            key,
 
             request_data['health']['flat'],
             request_data['health']['percent'],
@@ -360,29 +351,32 @@ class Database:
 
     ### Read from tables in database ###
 
-    def get_all_champion_metadata(self):
+    def get_some_champion_metadata(self, champions=[]):
         """
         Return:
         all champion metadata in a python dictionary
         """
-        self.__open_champion_names_json(read_metadata=True)
+        pass
 
-    def get_all_champion_stats(self):
+    def get_some_champion_stats(self, champions=[]):
         """
         Return:
         all champion stat data in a python dictionary
         """
-        self.__open_champion_names_json(read_stats=True)
+        data = {}
+        # if not champions:
+        #     champions =
+        # return self.__open_champion_names_json(read_stats=True)
 
     def get_champion_metadata(self, champion_name):
         """
         Return:
         champion metadata in a python dictionary
         """
-        select_command = "SELECT * FROM champion_metadata WHERE key=?"
-        self.__db_execute(select_command, values=[champion_name])
+        select_command = "SELECT * FROM champion_metadata WHERE key = ?"
+        self.__db_execute(select_command, values=[champion_name.lower()])
         data = self.cursor.fetchall()
-        print(data)
+        return data[0]
 
     def get_champion_stats(self, champion_name):
         """
