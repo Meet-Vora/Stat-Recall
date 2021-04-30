@@ -406,6 +406,7 @@ class Database:
         # return data[0]
 
     def close(self):
+        self.cursor.close()
         self.conn.close()
 
 
