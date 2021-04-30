@@ -10,22 +10,24 @@ print("HELLO")
 # Write all info to tables -- WORKS PERFECTLY!
 # db.write_all_champions_metadata()
 # print("DONE WRITING 1")
-db.write_all_champions_stats()
-print("DONE WRITING 2")
+# db.write_all_champions_stats()
+# print("DONE WRITING 2")
 
 # Read all info in tables
-metadata = db.get_champion_metadata("Aatrox")
-statdata = db.get_champion_stats("Aatrox")
+metadata = db.get_some_champions_metadata(["Aatrox", "Zilean"])
+statdata = db.get_some_champions_stats(["Aatrox", "Zilean"])
 print("DONE READING")
 
 
-def pretty(d, indent=0):
-    for key, value in d.items():
-        print('\t' * indent + str(key))
-        if isinstance(value, dict):
-            pretty(value, indent+1)
-        else:
-            print('\t' * (indent+1) + str(value))
+def pretty(data, indent=0):
+    for d in data:
+        for key, value in d.items():
+            print('\t' * indent + str(key))
+            if isinstance(value, dict):
+                pretty(value, indent+1)
+            else:
+                print('\t' * (indent+1) + str(value))
+        print("-------------------------------------------")
 
 
 pretty(metadata)

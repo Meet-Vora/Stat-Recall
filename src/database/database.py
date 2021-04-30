@@ -7,6 +7,12 @@ import os
 class Database:
 
     def __init__(self, patch="latest", auto_commit=True):
+        self.champ_names_path = os.path.join(os.path.dirname(
+            __file__), '../content/champion_names.json')
+
+        self.stat_names_path = os.path.join(os.path.dirname(
+            __file__), '../content/stat_names.json')
+
         self.patch = patch
         self.auto_commit = auto_commit
         self.champion_names = self.__read_all_champions()
@@ -20,11 +26,6 @@ class Database:
 
         self.base_url = "http://cdn.merakianalytics.com/riot/lol/resources/{}/en-US".format(
             self.patch)
-        self.champ_names_path = os.path.join(os.path.dirname(
-            __file__), '../content/champion_names.json')
-
-        self.stat_names_path = os.path.join(os.path.dirname(
-            __file__), '../content/stat_names.json')
 
     def __get_http_request(self, url):
         return requests.get(url)
@@ -45,12 +46,13 @@ class Database:
         # else:
         #     self.cursor.executemany(command, values)
 
+        print(values)
         self.cursor.execute(command, values)
         self.conn.commit()
 
     def __read_all_champions(self):
         with open(self.champ_names_path, "r") as file:
-            self.champion_names = json.load(file)['champions']
+            return json.load(file)['champions']
 
     def drop_champ_metadata_table(self):
         schema = """
@@ -349,44 +351,59 @@ class Database:
 
     ### Read from tables in database ###
 
-    def get_some_champion_metadata(self, champions=[]):
+    def get_some_champions_metadata(self, champion_names=[]):
         """
         Return:
         all champion metadata in a python dictionary
         """
-        pass
+        data = []
+        if not champion_names:
+            champion_names = self.champion_names
 
-    def get_some_champion_stats(self, champions=[]):
-        """
-        Return:
-        all champion stat data in a python dictionary
-        """
-        data = {}
-        pass
-        # if not champions:
-        #     champions =
-        # return self.__open_champion_names_json(read_stats=True)
+        for champion_name in champion_names:
+            data += [self.__get_champion_metadata(champion_name)]
 
-    def get_champion_metadata(self, champion_name):
+        return data
+
+    def __get_champion_metadata(self, champion_name):
         """
         Return:
         champion metadata in a python dictionary
         """
         select_command = "SELECT * FROM champion_metadata WHERE key = ?"
         self.__db_execute(select_command, values=[champion_name.lower()])
-        data = self.cursor.fetchall()
-        return data[0]
+        entry = self.cursor.fetchall()
+        return dict(entry[0])
 
-    def get_champion_stats(self, champion_name):
+    def get_some_champions_stats(self, champion_names=[]):
+        """
+        Return:
+        all champion stat data in a python dictionary
+        """
+        data = []
+        if not champion_names:
+            champion_names = self.champion_names
+
+        for champion_name in champion_names:
+            data += [self.__get_champion_stats(champion_name)]
+
+        return data
+        # return self.__open_champion_names_json(read_stats=True)
+
+    def __get_champion_stats(self, champion_name):
         """
         Return:
         champion base stats data in a python dictionary
         """
         select_command = "SELECT * FROM champion_base_stats WHERE key = ?"
         self.__db_execute(select_command, values=[champion_name.lower()])
-        data = self.cursor.fetchall()
-        print("HERE!!!", data[0])
-        return dict(data[0])
+        entry = self.cursor.fetchall()
+        return dict(entry[0])
+
+        # self.__db_execute(select_command, values=[champion_name.lower()])
+        # data = self.cursor.fetchall()
+        # print("HERE!!!", data[0])
+        # return data[0]
 
     def close(self):
         self.conn.close()
