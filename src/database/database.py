@@ -9,6 +9,7 @@ class Database:
     def __init__(self, patch="latest", auto_commit=True):
         self.patch = patch
         self.auto_commit = auto_commit
+        self.champion_names = self.__read_all_champions()
 
         # self.database_name = "database.db"
         self.database_name = os.path.join(os.path.dirname(
@@ -30,7 +31,7 @@ class Database:
 
     def __champion_http_request(self, champion_name):
         # url_name = "MonkeyKing" if champion_name == "Wukong" else champion_name
-        url = self.base_url + "/champions/" + url_name + ".json"
+        url = self.base_url + "/champions/" + champion_name + ".json"
         return self.__get_http_request(url).json()
 
     ### Create and write to tables in database ###
@@ -47,14 +48,9 @@ class Database:
         self.cursor.execute(command, values)
         self.conn.commit()
 
-    def __write_champion_names_json(self, write_metadata=False, write_stats=False):
+    def __read_all_champions(self):
         with open(self.champ_names_path, "r") as file:
-            champion_names = json.load(file)['champions']
-            for champion_name in champion_names:
-                if write_metadata:
-                    self.write_champion_metadata(champion_name)
-                if write_stats:
-                    self.write_champion_stats(champion_name)
+            self.champion_names = json.load(file)['champions']
 
     def drop_champ_metadata_table(self):
         schema = """
@@ -199,7 +195,8 @@ class Database:
         self.__db_execute(schema)
 
     def write_all_champions_metadata(self):
-        self.__write_champion_names_json(write_metadata=True)
+        for champion_name in self.champion_names:
+            self.write_champion_metadata(champion_name)
 
     def write_champion_metadata(self, champion_name):
         request_data = self.__champion_http_request(champion_name)
@@ -212,10 +209,11 @@ class Database:
         self.__db_execute(insert_command, values)
 
     def write_all_champions_stats(self):
-        self.__write_champion_names_json(write_stats=True)
+        for champion_name in self.champion_names:
+            self.write_champion_stats(champion_name)
 
     def write_champion_stats(self, champion_name):
-        key = self.__champion_http_request(champion_name)['key']
+        key = self.__champion_http_request(champion_name)['key'].lower()
         request_data = self.__champion_http_request(champion_name)['stats']
         insert_command = """INSERT OR REPLACE INTO champion_base_stats VALUES
         (
@@ -364,8 +362,9 @@ class Database:
         all champion stat data in a python dictionary
         """
         data = {}
-        if not champions:
-            champions =
+        pass
+        # if not champions:
+        #     champions =
         # return self.__open_champion_names_json(read_stats=True)
 
     def get_champion_metadata(self, champion_name):
@@ -383,6 +382,11 @@ class Database:
         Return:
         champion base stats data in a python dictionary
         """
+        select_command = "SELECT * FROM champion_base_stats WHERE key = ?"
+        self.__db_execute(select_command, values=[champion_name.lower()])
+        data = self.cursor.fetchall()
+        print("HERE!!!", data[0])
+        return dict(data[0])
 
     def close(self):
         self.conn.close()
