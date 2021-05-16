@@ -1,14 +1,11 @@
-from database import Database
-from itemslots import Itemslots
-from item import Item
+from copy import deepcopy
+from src.database.database import Database
+# from itemslots import Itemslots
+# from item import Item
 
 class Champion: 
     def __init__(self, champion_name):
-        database_instance = Database()
-
-        self.metadata = db.get_champion_metadata
-        self.basestats = db.get_champion_stats
-        self.itemslots = ItemSlots()
-
-
-         
+        db = Database()
+        self.metadata = db.get_some_champions_metadata([champion_name])
+        self.base_stats = db.get_some_champions_stats([champion_name])
+        self.current_stats = deepcopy(self.base_stats)

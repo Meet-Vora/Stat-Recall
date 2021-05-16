@@ -2,30 +2,21 @@ import sqlite3
 import requests
 import json
 import os
+from src.database.database import Database
 
+class ChampionDatabase(Database):
 
-class Database:
-
-    def __init__(self, patch="latest", auto_commit=True):
+    def __init__(self):
+        super.__init__()
+        
         self.champ_names_path = os.path.join(os.path.dirname(
             __file__), '../content/champion_names.json')
 
         self.stat_names_path = os.path.join(os.path.dirname(
             __file__), '../content/stat_names.json')
 
-        self.patch = patch
-        self.auto_commit = auto_commit
         self.champion_names = self.__read_all_champions()
 
-        # self.database_name = "database.db"
-        self.database_name = os.path.join(os.path.dirname(
-            __file__), './database.db')
-        self.conn = sqlite3.connect(self.database_name)
-        self.conn.row_factory = sqlite3.Row
-        self.cursor = self.conn.cursor()
-
-        self.base_url = "http://cdn.merakianalytics.com/riot/lol/resources/{}/en-US".format(
-            self.patch)
 
     def __get_http_request(self, url):
         return requests.get(url)
@@ -46,7 +37,6 @@ class Database:
         # else:
         #     self.cursor.executemany(command, values)
 
-        print(values)
         self.cursor.execute(command, values)
         self.conn.commit()
 
@@ -408,14 +398,3 @@ class Database:
     def close(self):
         self.cursor.close()
         self.conn.close()
-
-
-# if __name__ == '__main__':
-#     database = Database()
-#     # database.drop_champ_metadata_table()
-#     # database.drop_champ_basestat_table()
-#     # database.create_champion_metadata_table()
-#     # database.create_champion_stats_table()
-#     # database.write_all_champion_metadata()
-#     database.write_all_champion_stats()
-#     database.close()
