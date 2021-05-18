@@ -2,43 +2,26 @@ import sqlite3
 import requests
 import json
 import os
-from src.database.database import Database
+from src.database.classes.database import Database
+
 
 class ChampionDatabase(Database):
 
-    def __init__(self):
-        super.__init__()
-        
-        self.champ_names_path = os.path.join(os.path.dirname(
-            __file__), '../content/champion_names.json')
+    def __init__(self, patch="latest", auto_commit=True):
+        super().__init__(patch=patch, auto_commit=auto_commit)
 
-        self.stat_names_path = os.path.join(os.path.dirname(
-            __file__), '../content/stat_names.json')
+        self.champ_names_path = os.path.join(os.path.dirname(
+            __file__), '../../content/champion_names.json')
 
         self.champion_names = self.__read_all_champions()
-
-
-    def __get_http_request(self, url):
-        return requests.get(url)
+        self.base_url += "/champions"
 
     def __champion_http_request(self, champion_name):
         # url_name = "MonkeyKing" if champion_name == "Wukong" else champion_name
-        url = self.base_url + "/champions/" + champion_name + ".json"
-        return self.__get_http_request(url).json()
+        url = self.base_url + "/" + champion_name + ".json"
+        return self._get_http_request(url).json()
 
     ### Create and write to tables in database ###
-    def __db_execute(self, command, values=[]):
-        """
-        Private helper method for creating tables
-        """
-        # if not values:
-        # elif len(values) == 1:
-        #     self.cursor.execute(command, values)
-        # else:
-        #     self.cursor.executemany(command, values)
-
-        self.cursor.execute(command, values)
-        self.conn.commit()
 
     def __read_all_champions(self):
         with open(self.champ_names_path, "r") as file:
@@ -49,14 +32,14 @@ class ChampionDatabase(Database):
         DROP TABLE IF EXISTS champion_metadata
 
         """
-        self.__db_execute(schema)
+        self._db_execute(schema)
 
-    def drop_champ_basestat_table(self):
+    def drop_champ_base_stats_table(self):
         schema = """
         DROP TABLE IF EXISTS champion_base_stats
 
         """
-        self.__db_execute(schema)
+        self._db_execute(schema)
 
     def create_champion_metadata_table(self):
         schema = """
@@ -73,9 +56,9 @@ class ChampionDatabase(Database):
             adaptiveType TEXT NOT NULL
         )
         """
-        self.__db_execute(schema)
+        self._db_execute(schema)
 
-    def create_champion_stats_table(self):
+    def create_champion_base_stats_table(self):
         schema = """
         CREATE TABLE IF NOT EXISTS champion_base_stats
         (
@@ -184,21 +167,21 @@ class ChampionDatabase(Database):
             FOREIGN KEY(key) REFERENCES champion_metadata(key)
         )
         """
-        self.__db_execute(schema)
+        self._db_execute(schema)
 
     def write_all_champions_metadata(self):
         for champion_name in self.champion_names:
             self.write_champion_metadata(champion_name)
 
     def write_champion_metadata(self, champion_name):
-        request_data = self.__champion_http_request(champion_name)
+        response_data = self.__champion_http_request(champion_name)
         insert_command = "INSERT OR REPLACE INTO champion_metadata VALUES (?,?,?,?,?,?,?,?,?)"
-        values = [request_data['id'], request_data['key'].lower(), champion_name, request_data['title'],
-                  request_data['fullName'], request_data['icon'], request_data['resource'],
-                  request_data['attackType'], request_data['adaptiveType']
+        values = [response_data['id'], response_data['key'].lower(), champion_name, response_data['title'],
+                  response_data['fullName'], response_data['icon'], response_data['resource'],
+                  response_data['attackType'], response_data['adaptiveType']
                   ]
 
-        self.__db_execute(insert_command, values)
+        self._db_execute(insert_command, values)
 
     def write_all_champions_stats(self):
         for champion_name in self.champion_names:
@@ -206,7 +189,7 @@ class ChampionDatabase(Database):
 
     def write_champion_stats(self, champion_name):
         key = self.__champion_http_request(champion_name)['key'].lower()
-        request_data = self.__champion_http_request(champion_name)['stats']
+        response_data = self.__champion_http_request(champion_name)['stats']
         insert_command = """INSERT OR REPLACE INTO champion_base_stats VALUES
         (
             ?,
@@ -236,108 +219,108 @@ class ChampionDatabase(Database):
 
             key,
 
-            request_data['health']['flat'],
-            request_data['health']['percent'],
-            request_data['health']['perLevel'],
-            request_data['health']['percentPerLevel'],
+            response_data['health']['flat'],
+            response_data['health']['percent'],
+            response_data['health']['perLevel'],
+            response_data['health']['percentPerLevel'],
 
-            request_data['healthRegen']['flat'],
-            request_data['healthRegen']['percent'],
-            request_data['healthRegen']['perLevel'],
-            request_data['healthRegen']['percentPerLevel'],
+            response_data['healthRegen']['flat'],
+            response_data['healthRegen']['percent'],
+            response_data['healthRegen']['perLevel'],
+            response_data['healthRegen']['percentPerLevel'],
 
-            request_data['mana']['flat'],
-            request_data['mana']['percent'],
-            request_data['mana']['perLevel'],
-            request_data['mana']['percentPerLevel'],
+            response_data['mana']['flat'],
+            response_data['mana']['percent'],
+            response_data['mana']['perLevel'],
+            response_data['mana']['percentPerLevel'],
 
-            request_data['manaRegen']['flat'],
-            request_data['manaRegen']['percent'],
-            request_data['manaRegen']['perLevel'],
-            request_data['manaRegen']['percentPerLevel'],
+            response_data['manaRegen']['flat'],
+            response_data['manaRegen']['percent'],
+            response_data['manaRegen']['perLevel'],
+            response_data['manaRegen']['percentPerLevel'],
 
-            request_data['armor']['flat'],
-            request_data['armor']['percent'],
-            request_data['armor']['perLevel'],
-            request_data['armor']['percentPerLevel'],
+            response_data['armor']['flat'],
+            response_data['armor']['percent'],
+            response_data['armor']['perLevel'],
+            response_data['armor']['percentPerLevel'],
 
-            request_data['magicResistance']['flat'],
-            request_data['magicResistance']['percent'],
-            request_data['magicResistance']['perLevel'],
-            request_data['magicResistance']['percentPerLevel'],
+            response_data['magicResistance']['flat'],
+            response_data['magicResistance']['percent'],
+            response_data['magicResistance']['perLevel'],
+            response_data['magicResistance']['percentPerLevel'],
 
-            request_data['attackDamage']['flat'],
-            request_data['attackDamage']['percent'],
-            request_data['attackDamage']['perLevel'],
-            request_data['attackDamage']['percentPerLevel'],
+            response_data['attackDamage']['flat'],
+            response_data['attackDamage']['percent'],
+            response_data['attackDamage']['perLevel'],
+            response_data['attackDamage']['percentPerLevel'],
 
-            request_data['movespeed']['flat'],
-            request_data['movespeed']['percent'],
-            request_data['movespeed']['perLevel'],
-            request_data['movespeed']['percentPerLevel'],
+            response_data['movespeed']['flat'],
+            response_data['movespeed']['percent'],
+            response_data['movespeed']['perLevel'],
+            response_data['movespeed']['percentPerLevel'],
 
-            request_data['acquisitionRadius']['flat'],
-            request_data['acquisitionRadius']['percent'],
-            request_data['acquisitionRadius']['perLevel'],
-            request_data['acquisitionRadius']['percentPerLevel'],
+            response_data['acquisitionRadius']['flat'],
+            response_data['acquisitionRadius']['percent'],
+            response_data['acquisitionRadius']['perLevel'],
+            response_data['acquisitionRadius']['percentPerLevel'],
 
-            request_data['selectionRadius']['flat'],
-            request_data['selectionRadius']['percent'],
-            request_data['selectionRadius']['perLevel'],
-            request_data['selectionRadius']['percentPerLevel'],
+            response_data['selectionRadius']['flat'],
+            response_data['selectionRadius']['percent'],
+            response_data['selectionRadius']['perLevel'],
+            response_data['selectionRadius']['percentPerLevel'],
 
-            request_data['pathingRadius']['flat'],
-            request_data['pathingRadius']['percent'],
-            request_data['pathingRadius']['perLevel'],
-            request_data['pathingRadius']['percentPerLevel'],
+            response_data['pathingRadius']['flat'],
+            response_data['pathingRadius']['percent'],
+            response_data['pathingRadius']['perLevel'],
+            response_data['pathingRadius']['percentPerLevel'],
 
-            request_data['gameplayRadius']['flat'],
-            request_data['gameplayRadius']['percent'],
-            request_data['gameplayRadius']['perLevel'],
-            request_data['gameplayRadius']['percentPerLevel'],
+            response_data['gameplayRadius']['flat'],
+            response_data['gameplayRadius']['percent'],
+            response_data['gameplayRadius']['perLevel'],
+            response_data['gameplayRadius']['percentPerLevel'],
 
-            request_data['criticalStrikeDamage']['flat'],
-            request_data['criticalStrikeDamage']['percent'],
-            request_data['criticalStrikeDamage']['perLevel'],
-            request_data['criticalStrikeDamage']['percentPerLevel'],
+            response_data['criticalStrikeDamage']['flat'],
+            response_data['criticalStrikeDamage']['percent'],
+            response_data['criticalStrikeDamage']['perLevel'],
+            response_data['criticalStrikeDamage']['percentPerLevel'],
 
-            request_data['criticalStrikeDamageModifier']['flat'],
-            request_data['criticalStrikeDamageModifier']['percent'],
-            request_data['criticalStrikeDamageModifier']['perLevel'],
-            request_data['criticalStrikeDamageModifier']['percentPerLevel'],
+            response_data['criticalStrikeDamageModifier']['flat'],
+            response_data['criticalStrikeDamageModifier']['percent'],
+            response_data['criticalStrikeDamageModifier']['perLevel'],
+            response_data['criticalStrikeDamageModifier']['percentPerLevel'],
 
-            request_data['attackSpeed']['flat'],
-            request_data['attackSpeed']['percent'],
-            request_data['attackSpeed']['perLevel'],
-            request_data['attackSpeed']['percentPerLevel'],
+            response_data['attackSpeed']['flat'],
+            response_data['attackSpeed']['percent'],
+            response_data['attackSpeed']['perLevel'],
+            response_data['attackSpeed']['percentPerLevel'],
 
-            request_data['attackSpeedRatio']['flat'],
-            request_data['attackSpeedRatio']['percent'],
-            request_data['attackSpeedRatio']['perLevel'],
-            request_data['attackSpeedRatio']['percentPerLevel'],
+            response_data['attackSpeedRatio']['flat'],
+            response_data['attackSpeedRatio']['percent'],
+            response_data['attackSpeedRatio']['perLevel'],
+            response_data['attackSpeedRatio']['percentPerLevel'],
 
-            request_data['attackCastTime']['flat'],
-            request_data['attackCastTime']['percent'],
-            request_data['attackCastTime']['perLevel'],
-            request_data['attackCastTime']['percentPerLevel'],
+            response_data['attackCastTime']['flat'],
+            response_data['attackCastTime']['percent'],
+            response_data['attackCastTime']['perLevel'],
+            response_data['attackCastTime']['percentPerLevel'],
 
-            request_data['attackTotalTime']['flat'],
-            request_data['attackTotalTime']['percent'],
-            request_data['attackTotalTime']['perLevel'],
-            request_data['attackTotalTime']['percentPerLevel'],
+            response_data['attackTotalTime']['flat'],
+            response_data['attackTotalTime']['percent'],
+            response_data['attackTotalTime']['perLevel'],
+            response_data['attackTotalTime']['percentPerLevel'],
 
-            request_data['attackDelayOffset']['flat'],
-            request_data['attackDelayOffset']['percent'],
-            request_data['attackDelayOffset']['perLevel'],
-            request_data['attackDelayOffset']['percentPerLevel'],
+            response_data['attackDelayOffset']['flat'],
+            response_data['attackDelayOffset']['percent'],
+            response_data['attackDelayOffset']['perLevel'],
+            response_data['attackDelayOffset']['percentPerLevel'],
 
-            request_data['attackRange']['flat'],
-            request_data['attackRange']['percent'],
-            request_data['attackRange']['perLevel'],
-            request_data['attackRange']['percentPerLevel'],
+            response_data['attackRange']['flat'],
+            response_data['attackRange']['percent'],
+            response_data['attackRange']['perLevel'],
+            response_data['attackRange']['percentPerLevel'],
 
         ]
-        self.__db_execute(insert_command, values)
+        self._db_execute(insert_command, values)
 
     ### Read from tables in database ###
 
@@ -361,7 +344,7 @@ class ChampionDatabase(Database):
         champion metadata in a python dictionary
         """
         select_command = "SELECT * FROM champion_metadata WHERE key = ?"
-        self.__db_execute(select_command, values=[champion_name.lower()])
+        self._db_execute(select_command, values=[champion_name.lower()])
         entry = self.cursor.fetchall()
         return dict(entry[0])
 
@@ -386,15 +369,11 @@ class ChampionDatabase(Database):
         champion base stats data in a python dictionary
         """
         select_command = "SELECT * FROM champion_base_stats WHERE key = ?"
-        self.__db_execute(select_command, values=[champion_name.lower()])
+        self._db_execute(select_command, values=[champion_name.lower()])
         entry = self.cursor.fetchall()
         return dict(entry[0])
 
-        # self.__db_execute(select_command, values=[champion_name.lower()])
+        # self._db_execute(select_command, values=[champion_name.lower()])
         # data = self.cursor.fetchall()
         # print("HERE!!!", data[0])
         # return data[0]
-
-    def close(self):
-        self.cursor.close()
-        self.conn.close()
