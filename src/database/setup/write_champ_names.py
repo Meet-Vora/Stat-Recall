@@ -18,5 +18,5 @@ for champ in data:
     # champion_names += [data[champ]['name']]
 
 with open(os.path.join(os.path.dirname(
-        __file__), '../content/champion_names.json'), "w+") as file:
+        __file__), '../../content/champion_names.json'), "w+") as file:
     json.dump({"champions": champion_names}, file)
