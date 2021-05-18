@@ -3,30 +3,52 @@ from bs4 import BeautifulSoup
 import os
 import json
 
-api_base_url = "http://cdn.merakianalytics.com/riot/lol/resources/latest/en-US/items/"
-base_response = requests.get(api_base_url)
-soup = BeautifulSoup(base_response.text, "html.parser")
-links = []
 
-# gets all the names of the json files so that you can use them in the request url
-for link in soup.find_all('a'):
-    href = link.get('href')
-    if href != "../" and href.find("msgpack") == -1:
-        links.append(href)
-        
+############### Requesting data from ddragon API ###############
+
+ddragon_url = "https://ddragon.leagueoflegends.com/cdn/11.10.1/data/en_US/item.json"
+response = requests.get(ddragon_url)
+item_json = response.json()['data']
 data_lst = []
-for json_name in links:
-    url = api_base_url + json_name
-    item = requests.get(url).json()
-    if not item['removed']:
+for item_number in item_json:
+    item = item_json[item_number]
+    if 'maps' in item and '11' in item['maps'] and item['maps']['11']:
         data = {}
-        data['id'] = item["id"]
-        data['name'] = item["name"]
+        data['id'] = item_number
+        data['name'] = item['name']
         data_lst += [data]
 
-with open(os.path.join(os.path.dirname(__file__), '../../content/item_list.json'), "w+") as file:
+with open(os.path.join(os.path.dirname(__file__), '../../content/ddragon_item_list.json'), "w+") as file:
     json.dump({"items": data_lst}, file)
 
+
+############### Requesting data from merakianalytics API ###############
+
+# api_base_url = "http://cdn.merakianalytics.com/riot/lol/resources/latest/en-US/items/"
+# base_response = requests.get(api_base_url)
+# soup = BeautifulSoup(base_response.text, "html.parser")
+# links = []
+
+# # gets all the names of the json files so that you can use them in the request url
+# for link in soup.find_all('a'):
+#     href = link.get('href')
+#     if href != "../" and href.find("msgpack") == -1:
+#         links.append(href)
+
+# data_lst = []
+# for json_name in links:
+#     url = api_base_url + json_name
+#     item = requests.get(url).json()
+#     if not item['removed']:
+#         data = {}
+#         data['id'] = item["id"]
+#         data['name'] = item["name"]
+#         data_lst += [data]
+
+# with open(os.path.join(os.path.dirname(__file__), '../../content/item_list.json'), "w+") as file:
+#     json.dump({"items": data_lst}, file)
+
+############### Parsing wiki web page ###############
 
 # wiki_base_url = "https://leagueoflegends.fandom.com/wiki/List_of_items"
 # grid_xpath = "/html/body/div[3]/div[7]/div/div[1]/article/div[1]/div[2]/div[1]/div/div[2]/div/div/div/div/div/div[3]/div/div"
