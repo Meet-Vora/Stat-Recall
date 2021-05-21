@@ -36,7 +36,7 @@ class ItemDatabase(Database):
 
             goldTotal INTEGER NOT NULL,
             goldSell INTEGER NOT NULL,
-            purchasable INTEGER NOT NULL CHECK (purchasable IN (0, 1)
+            purchasable INTEGER NOT NULL CHECK (purchasable IN (0, 1))
         )
         """
         self._db_execute(schema)
