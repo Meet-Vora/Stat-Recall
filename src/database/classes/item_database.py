@@ -21,7 +21,7 @@ class ItemDatabase(Database):
 
     def __item_http_request(self, item_number):
         # url_name = "MonkeyKing" if champion_name == "Wukong" else champion_name
-        url = self.base_url + "/" + item_number + ".json"
+        url = self.base_url + "/" + str(item_number) + ".json"
         return self._get_http_request(url).json()
 
     def drop_item_metadata_table(self):
@@ -207,7 +207,7 @@ class ItemDatabase(Database):
 
     def write_all_items_metadata(self):
         for item in self.items:
-            self.write_item_metadata(item['id'])
+            self.write_item_metadata(int(item['id']))
 
     def write_item_metadata(self, item_number):
 
@@ -229,11 +229,17 @@ class ItemDatabase(Database):
         self._db_execute(insert_command, values)
 
     def write_all_items_base_stats(self):
+        counter = 0
         for item in self.items:
-            self.write_item_base_stats
+            print(counter, "|", item['id'])
+            self.write_item_base_stats(int(item['id']))
+            counter += 1
 
     def write_item_base_stats(self, item_number):
-        response_data = self.__item_http_request(item_number)['stats']
+        response_data = self.__item_http_request(item_number)
+        item_id = response_data['id']
+        stats = response_data['stats']
+
         insert_command = """
         INSERT OR REPLACE INTO item_base_stats VALUES 
         (
@@ -261,155 +267,189 @@ class ItemDatabase(Database):
             ?,?,?,?,?,?
         )
         """
-        values = [
-            response_data['id'],
-
-            response_data['abilityPower']['Flat'],
-            response_data['abilityPower']['Percent'],
-            response_data['abilityPower']['PerLevel'],
-            response_data['abilityPower']['PercentPerLevel'],
-            response_data['abilityPower']['PercentBase'],
-            response_data['abilityPower']['PercentBonus'],
-
-            response_data['armor']['Flat'],
-            response_data['armor']['Percent'],
-            response_data['armor']['PerLevel'],
-            response_data['armor']['PercentPerLevel'],
-            response_data['armor']['PercentBase'],
-            response_data['armor']['PercentBonus'],
-
-            response_data['armorPenetration']['Flat'],
-            response_data['armorPenetration']['Percent'],
-            response_data['armorPenetration']['PerLevel'],
-            response_data['armorPenetration']['PercentPerLevel'],
-            response_data['armorPenetration']['PercentBase'],
-            response_data['armorPenetration']['PercentBonus'],
-
-            response_data['attackDamage']['Flat'],
-            response_data['attackDamage']['Percent'],
-            response_data['attackDamage']['PerLevel'],
-            response_data['attackDamage']['PercentPerLevel'],
-            response_data['attackDamage']['PercentBase'],
-            response_data['attackDamage']['PercentBonus'],
-
-            response_data['attackSpeed']['Flat'],
-            response_data['attackSpeed']['Percent'],
-            response_data['attackSpeed']['PerLevel'],
-            response_data['attackSpeed']['PercentPerLevel'],
-            response_data['attackSpeed']['PercentBase'],
-            response_data['attackSpeed']['PercentBonus'],
-
-            response_data['cooldownReduction']['Flat'],
-            response_data['cooldownReduction']['Percent'],
-            response_data['cooldownReduction']['PerLevel'],
-            response_data['cooldownReduction']['PercentPerLevel'],
-            response_data['cooldownReduction']['PercentBase'],
-            response_data['cooldownReduction']['PercentBonus'],
-
-            response_data['criticalStrikeChance']['Flat'],
-            response_data['criticalStrikeChance']['Percent'],
-            response_data['criticalStrikeChance']['PerLevel'],
-            response_data['criticalStrikeChance']['PercentPerLevel'],
-            response_data['criticalStrikeChance']['PercentBase'],
-            response_data['criticalStrikeChance']['PercentBonus'],
-
-            response_data['goldPer10']['Flat'],
-            response_data['goldPer10']['Percent'],
-            response_data['goldPer10']['PerLevel'],
-            response_data['goldPer10']['PercentPerLevel'],
-            response_data['goldPer10']['PercentBase'],
-            response_data['goldPer10']['PercentBonus'],
-
-            response_data['healAndShieldPower']['Flat'],
-            response_data['healAndShieldPower']['Percent'],
-            response_data['healAndShieldPower']['PerLevel'],
-            response_data['healAndShieldPower']['PercentPerLevel'],
-            response_data['healAndShieldPower']['PercentBase'],
-            response_data['healAndShieldPower']['PercentBonus'],
-
-            response_data['health']['Flat'],
-            response_data['health']['Percent'],
-            response_data['health']['PerLevel'],
-            response_data['health']['PercentPerLevel'],
-            response_data['health']['PercentBase'],
-            response_data['health']['PercentBonus'],
-
-            response_data['healthRegen']['Flat'],
-            response_data['healthRegen']['Percent'],
-            response_data['healthRegen']['PerLevel'],
-            response_data['healthRegen']['PercentPerLevel'],
-            response_data['healthRegen']['PercentBase'],
-            response_data['healthRegen']['PercentBonus'],
-
-            response_data['lethality']['Flat'],
-            response_data['lethality']['Percent'],
-            response_data['lethality']['PerLevel'],
-            response_data['lethality']['PercentPerLevel'],
-            response_data['lethality']['PercentBase'],
-            response_data['lethality']['PercentBonus'],
-
-            response_data['lifesteal']['Flat'],
-            response_data['lifesteal']['Percent'],
-            response_data['lifesteal']['PerLevel'],
-            response_data['lifesteal']['PercentPerLevel'],
-            response_data['lifesteal']['PercentBase'],
-            response_data['lifesteal']['PercentBonus'],
-
-            response_data['magicPenetration']['Flat'],
-            response_data['magicPenetration']['Percent'],
-            response_data['magicPenetration']['PerLevel'],
-            response_data['magicPenetration']['PercentPerLevel'],
-            response_data['magicPenetration']['PercentBase'],
-            response_data['magicPenetration']['PercentBonus'],
-
-            response_data['magicResistance']['Flat'],
-            response_data['magicResistance']['Percent'],
-            response_data['magicResistance']['PerLevel'],
-            response_data['magicResistance']['PercentPerLevel'],
-            response_data['magicResistance']['PercentBase'],
-            response_data['magicResistance']['PercentBonus'],
-
-            response_data['mana']['Flat'],
-            response_data['mana']['Percent'],
-            response_data['mana']['PerLevel'],
-            response_data['mana']['PercentPerLevel'],
-            response_data['mana']['PercentBase'],
-            response_data['mana']['PercentBonus'],
-
-            response_data['manaRegen']['Flat'],
-            response_data['manaRegen']['Percent'],
-            response_data['manaRegen']['PerLevel'],
-            response_data['manaRegen']['PercentPerLevel'],
-            response_data['manaRegen']['PercentBase'],
-            response_data['manaRegen']['PercentBonus'],
-
-            response_data['movespeed']['Flat'],
-            response_data['movespeed']['Percent'],
-            response_data['movespeed']['PerLevel'],
-            response_data['movespeed']['PercentPerLevel'],
-            response_data['movespeed']['PercentBase'],
-            response_data['movespeed']['PercentBonus'],
-
-            response_data['abilityHaste']['Flat'],
-            response_data['abilityHaste']['Percent'],
-            response_data['abilityHaste']['PerLevel'],
-            response_data['abilityHaste']['PercentPerLevel'],
-            response_data['abilityHaste']['PercentBase'],
-            response_data['abilityHaste']['PercentBonus'],
-
-            response_data['omnivamp']['Flat'],
-            response_data['omnivamp']['Percent'],
-            response_data['omnivamp']['PerLevel'],
-            response_data['omnivamp']['PercentPerLevel'],
-            response_data['omnivamp']['PercentBase'],
-            response_data['omnivamp']['PercentBonus'],
-
-            response_data['tenacity']['Flat'],
-            response_data['tenacity']['Percent'],
-            response_data['tenacity']['PerLevel'],
-            response_data['tenacity']['PercentPerLevel'],
-            response_data['tenacity']['PercentBase'],
-            response_data['tenacity']['PercentBonus']
-
+        values = [item_id]
+        stat_types = [
+            "abilityPower",
+            "armor",
+            "armorPenetration",
+            "attackDamage",
+            "attackSpeed",
+            "cooldownReduction",
+            "criticalStrikeChance",
+            "goldPer_10",
+            "healAndShieldPower",
+            "health",
+            "healthRegen",
+            "lethality",
+            "lifesteal",
+            "magicPenetration",
+            "magicResistance",
+            "mana",
+            "manaRegen",
+            "movespeed",
+            "abilityHaste",
+            "omnivamp",
+            "tenacity",
         ]
+
+        for stat in stat_types:
+            # setting value of stats that are nto included to be -1
+            if stat not in stats:
+                for _ in range(6):
+                    values += [-1]
+            else:
+                for scale_type in stats[stat]:
+                    values += [stats[stat][scale_type]]
+
+        # values = [
+        #     item_id,
+
+        #     stats['abilityPower']['flat'],
+        #     stats['abilityPower']['percent'],
+        #     stats['abilityPower']['perLevel'],
+        #     stats['abilityPower']['percentPerLevel'],
+        #     stats['abilityPower']['percentBase'],
+        #     stats['abilityPower']['percentBonus'],
+
+        #     stats['armor']['flat'],
+        #     stats['armor']['percent'],
+        #     stats['armor']['perLevel'],
+        #     stats['armor']['percentPerLevel'],
+        #     stats['armor']['percentBase'],
+        #     stats['armor']['percentBonus'],
+
+        #     stats['armorPenetration']['flat'],
+        #     stats['armorPenetration']['percent'],
+        #     stats['armorPenetration']['perLevel'],
+        #     stats['armorPenetration']['percentPerLevel'],
+        #     stats['armorPenetration']['percentBase'],
+        #     stats['armorPenetration']['percentBonus'],
+
+        #     stats['attackDamage']['flat'],
+        #     stats['attackDamage']['percent'],
+        #     stats['attackDamage']['perLevel'],
+        #     stats['attackDamage']['percentPerLevel'],
+        #     stats['attackDamage']['percentBase'],
+        #     stats['attackDamage']['percentBonus'],
+
+        #     stats['attackSpeed']['flat'],
+        #     stats['attackSpeed']['percent'],
+        #     stats['attackSpeed']['perLevel'],
+        #     stats['attackSpeed']['percentPerLevel'],
+        #     stats['attackSpeed']['percentBase'],
+        #     stats['attackSpeed']['percentBonus'],
+
+        #     stats['cooldownReduction']['flat'],
+        #     stats['cooldownReduction']['percent'],
+        #     stats['cooldownReduction']['perLevel'],
+        #     stats['cooldownReduction']['percentPerLevel'],
+        #     stats['cooldownReduction']['percentBase'],
+        #     stats['cooldownReduction']['percentBonus'],
+
+        #     stats['criticalStrikeChance']['flat'],
+        #     stats['criticalStrikeChance']['percent'],
+        #     stats['criticalStrikeChance']['perLevel'],
+        #     stats['criticalStrikeChance']['percentPerLevel'],
+        #     stats['criticalStrikeChance']['percentBase'],
+        #     stats['criticalStrikeChance']['percentBonus'],
+
+        #     stats['goldPer_10']['flat'],
+        #     stats['goldPer_10']['percent'],
+        #     stats['goldPer_10']['perLevel'],
+        #     stats['goldPer_10']['percentPerLevel'],
+        #     stats['goldPer_10']['percentBase'],
+        #     stats['goldPer_10']['percentBonus'],
+
+        #     stats['healAndShieldPower']['flat'],
+        #     stats['healAndShieldPower']['percent'],
+        #     stats['healAndShieldPower']['perLevel'],
+        #     stats['healAndShieldPower']['percentPerLevel'],
+        #     stats['healAndShieldPower']['percentBase'],
+        #     stats['healAndShieldPower']['percentBonus'],
+
+        #     stats['health']['flat'],
+        #     stats['health']['percent'],
+        #     stats['health']['perLevel'],
+        #     stats['health']['percentPerLevel'],
+        #     stats['health']['percentBase'],
+        #     stats['health']['percentBonus'],
+
+        #     stats['healthRegen']['flat'],
+        #     stats['healthRegen']['percent'],
+        #     stats['healthRegen']['perLevel'],
+        #     stats['healthRegen']['percentPerLevel'],
+        #     stats['healthRegen']['percentBase'],
+        #     stats['healthRegen']['percentBonus'],
+
+        #     stats['lethality']['flat'],
+        #     stats['lethality']['percent'],
+        #     stats['lethality']['perLevel'],
+        #     stats['lethality']['percentPerLevel'],
+        #     stats['lethality']['percentBase'],
+        #     stats['lethality']['percentBonus'],
+
+        #     stats['lifesteal']['flat'],
+        #     stats['lifesteal']['percent'],
+        #     stats['lifesteal']['perLevel'],
+        #     stats['lifesteal']['percentPerLevel'],
+        #     stats['lifesteal']['percentBase'],
+        #     stats['lifesteal']['percentBonus'],
+
+        #     stats['magicPenetration']['flat'],
+        #     stats['magicPenetration']['percent'],
+        #     stats['magicPenetration']['perLevel'],
+        #     stats['magicPenetration']['percentPerLevel'],
+        #     stats['magicPenetration']['percentBase'],
+        #     stats['magicPenetration']['percentBonus'],
+
+        #     stats['magicResistance']['flat'],
+        #     stats['magicResistance']['percent'],
+        #     stats['magicResistance']['perLevel'],
+        #     stats['magicResistance']['percentPerLevel'],
+        #     stats['magicResistance']['percentBase'],
+        #     stats['magicResistance']['percentBonus'],
+
+        #     stats['mana']['flat'],
+        #     stats['mana']['percent'],
+        #     stats['mana']['perLevel'],
+        #     stats['mana']['percentPerLevel'],
+        #     stats['mana']['percentBase'],
+        #     stats['mana']['percentBonus'],
+
+        #     stats['manaRegen']['flat'],
+        #     stats['manaRegen']['percent'],
+        #     stats['manaRegen']['perLevel'],
+        #     stats['manaRegen']['percentPerLevel'],
+        #     stats['manaRegen']['percentBase'],
+        #     stats['manaRegen']['percentBonus'],
+
+        #     stats['movespeed']['flat'],
+        #     stats['movespeed']['percent'],
+        #     stats['movespeed']['perLevel'],
+        #     stats['movespeed']['percentPerLevel'],
+        #     stats['movespeed']['percentBase'],
+        #     stats['movespeed']['percentBonus'],
+
+        #     stats['abilityHaste']['flat'],
+        #     stats['abilityHaste']['percent'],
+        #     stats['abilityHaste']['perLevel'],
+        #     stats['abilityHaste']['percentPerLevel'],
+        #     stats['abilityHaste']['percentBase'],
+        #     stats['abilityHaste']['percentBonus'],
+
+        #     stats['omnivamp']['flat'],
+        #     stats['omnivamp']['percent'],
+        #     stats['omnivamp']['perLevel'],
+        #     stats['omnivamp']['percentPerLevel'],
+        #     stats['omnivamp']['percentBase'],
+        #     stats['omnivamp']['percentBonus'],
+
+        #     stats['tenacity']['flat'],
+        #     stats['tenacity']['percent'],
+        #     stats['tenacity']['perLevel'],
+        #     stats['tenacity']['percentPerLevel'],
+        #     stats['tenacity']['percentBase'],
+        #     stats['tenacity']['percentBonus']
+
+        # ]
         self._db_execute(insert_command, values)
