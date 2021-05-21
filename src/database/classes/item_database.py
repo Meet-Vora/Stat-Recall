@@ -24,6 +24,14 @@ class ItemDatabase(Database):
         url = self.base_url + "/" + item_number + ".json"
         return self._get_http_request(url).json()
 
+    def drop_item_metadata_table(self):
+        schema = "DROP TABLE IF EXISTS item_metadata"
+        self._db_execute(schema)
+
+    def drop_item_base_stats_table(self):
+        schema = "DROP TABLE IF EXISTS item_base_stats"
+        self._db_execute(schema)
+
     def create_item_metadata_table(self):
         schema = """
         CREATE TABLE IF NOT EXISTS item_metadata 
@@ -197,24 +205,24 @@ class ItemDatabase(Database):
         """
         self._db_execute(schema)
 
-    def drop_item_metadata_table(self):
-        schema = "DROP TABLE IF EXISTS item_metadata"
-        self._db_execute(schema)
-
-    def drop_item_base_stats_table(self):
-        schema = "DROP TABLE IF EXISTS item_base_stats"
-        self._db_execute(schema)
-
     def write_all_items_metadata(self):
         for item in self.items:
             self.write_item_metadata(item['id'])
 
     def write_item_metadata(self, item_number):
+
         response_data = self.__item_http_request(item_number)
         insert_command = "INSERT OR REPLACE INTO item_metadata VALUES (?, ?, ?, ?, ?, ?, ?)"
+
+        requiredChampion, requiredAlly = "requiredChampion", "requiredAlly"
+        if requiredChampion not in response_data:
+            requiredChampion = "required_champion"
+        if requiredAlly not in response_data:
+            requiredAlly = "required_ally"
+
         values = [
-            response_data['id'], response_data['name'], response_data['requiredChampion'],
-            response_data['requiredAlly'],  response_data['shop']['prices']['total'],
+            response_data['id'], response_data['name'], response_data[requiredChampion],
+            response_data[requiredAlly],  response_data['shop']['prices']['total'],
             response_data['shop']['prices']['sell'],
             1 if response_data['shop']['purchasable'] else 0
         ]

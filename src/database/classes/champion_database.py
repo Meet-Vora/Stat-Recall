@@ -182,11 +182,8 @@ class ChampionDatabase(Database):
         self._db_execute(insert_command, values)
 
     def write_all_champions_base_stats(self):
-        counter = 0
         for champion_name in self.champion_names:
             self.write_champion_base_stats(champion_name)
-            print(counter)
-            counter += 1
 
     def write_champion_base_stats(self, champion_name):
         response_data = self.__champion_http_request(champion_name)
