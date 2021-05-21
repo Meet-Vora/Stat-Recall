@@ -293,7 +293,7 @@ class ItemDatabase(Database):
         ]
 
         for stat in stat_types:
-            # setting value of stats that are nto included to be -1
+            # setting value of stats that are not included to be -1
             if stat not in stats:
                 for _ in range(6):
                     values += [-1]
