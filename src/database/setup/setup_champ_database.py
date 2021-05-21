@@ -5,6 +5,7 @@ champ_db = ChampionDatabase()
 # Create tables
 champ_db.create_champion_metadata_table()
 champ_db.create_champion_base_stats_table()
+print("DONE CREATING 1")
 
 # Write all info to tables -- WORKS PERFECTLY!
 # champ_db.write_all_champions_metadata()
