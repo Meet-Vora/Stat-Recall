@@ -1,20 +1,20 @@
-from src.database.classes.database import Database
+from src.database.classes.champion_database import ChampionDatabase
 
-db = Database()
+champ_db = ChampionDatabase()
 
 # Create tables
-db.create_champion_metadata_table()
-db.create_champion_stats_table()
+champ_db.create_champion_metadata_table()
+champ_db.create_champion_base_stats_table()
 
 # Write all info to tables -- WORKS PERFECTLY!
-# db.write_all_champions_metadata()
+# champ_db.write_all_champions_metadata()
 # print("DONE WRITING 1")
-# db.write_all_champions_stats()
+# champ_db.write_all_champions_stats()
 # print("DONE WRITING 2")
 
 # Read all info in tables
-metadata = db.get_some_champions_metadata(["Aatrox", "Zilean"])
-statdata = db.get_some_champions_stats(["Aatrox", "Zilean"])
+metadata = champ_db.get_some_champions_metadata(["Aatrox", "Zilean"])
+statdata = champ_db.get_some_champions_stats(["Aatrox", "Zilean"])
 
 print(metadata[0])
 print("====================================")
@@ -38,5 +38,5 @@ print(statdata[0])
 # pretty(statdata)
 
 
-# Close db instance
-db.close()
+# Close champ_db instance
+champ_db.close()
