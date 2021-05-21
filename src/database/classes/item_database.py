@@ -45,7 +45,7 @@ class ItemDatabase(Database):
         schema = """
         CREATE TABLE IF NOT EXISTS item_base_stats
         (
-            id INTEGER NOT NULL,
+            id INTEGER NOT NULL PRIMARY KEY,
 
             abilityPowerFlat INTEGER NOT NULL,
             abilityPowerPercent INTEGER NOT NULL,
@@ -192,9 +192,7 @@ class ItemDatabase(Database):
             tenacityPerLevel INTEGER NOT NULL,
             tenacityPercentPerLevel INTEGER NOT NULL,
             tenacityPercentBase INTEGER NOT NULL,
-            tenacityPercentBonus INTEGER NOT NULL,
-
-            FOREIGN KEY(id) REFERENCES item_metadata(id)
+            tenacityPercentBonus INTEGER NOT NULL
         )
         """
         self._db_execute(schema)
