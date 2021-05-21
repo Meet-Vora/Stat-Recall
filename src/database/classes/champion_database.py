@@ -62,7 +62,7 @@ class ChampionDatabase(Database):
         schema = """
         CREATE TABLE IF NOT EXISTS champion_base_stats
         (
-            key TEXT NOT NULL,
+            key TEXT NOT NULL PRIMARY KEY,
 
             healthFlat INTEGER NOT NULL,
             healthPercent INTEGER NOT NULL,
@@ -162,9 +162,7 @@ class ChampionDatabase(Database):
             attackRangeFlat INTEGER NOT NULL,
             attackRangePercent INTEGER NOT NULL,
             attackRangePerLevel INTEGER NOT NULL,
-            attackRangePercentPerLevel INTEGER NOT NULL,
-
-            FOREIGN KEY(key) REFERENCES champion_metadata(key)
+            attackRangePercentPerLevel INTEGER NOT NULL
         )
         """
         self._db_execute(schema)
@@ -184,12 +182,16 @@ class ChampionDatabase(Database):
         self._db_execute(insert_command, values)
 
     def write_all_champions_base_stats(self):
+        counter = 0
         for champion_name in self.champion_names:
             self.write_champion_base_stats(champion_name)
+            print(counter)
+            counter += 1
 
     def write_champion_base_stats(self, champion_name):
-        key = self.__champion_http_request(champion_name)['key'].lower()
-        response_data = self.__champion_http_request(champion_name)['stats']
+        response_data = self.__champion_http_request(champion_name)
+        key = response_data['key'].lower()
+        stats = response_data['stats']
         insert_command = """INSERT OR REPLACE INTO champion_base_stats VALUES
         (
             ?,
@@ -219,105 +221,105 @@ class ChampionDatabase(Database):
 
             key,
 
-            response_data['health']['flat'],
-            response_data['health']['percent'],
-            response_data['health']['perLevel'],
-            response_data['health']['percentPerLevel'],
+            stats['health']['flat'],
+            stats['health']['percent'],
+            stats['health']['perLevel'],
+            stats['health']['percentPerLevel'],
 
-            response_data['healthRegen']['flat'],
-            response_data['healthRegen']['percent'],
-            response_data['healthRegen']['perLevel'],
-            response_data['healthRegen']['percentPerLevel'],
+            stats['healthRegen']['flat'],
+            stats['healthRegen']['percent'],
+            stats['healthRegen']['perLevel'],
+            stats['healthRegen']['percentPerLevel'],
 
-            response_data['mana']['flat'],
-            response_data['mana']['percent'],
-            response_data['mana']['perLevel'],
-            response_data['mana']['percentPerLevel'],
+            stats['mana']['flat'],
+            stats['mana']['percent'],
+            stats['mana']['perLevel'],
+            stats['mana']['percentPerLevel'],
 
-            response_data['manaRegen']['flat'],
-            response_data['manaRegen']['percent'],
-            response_data['manaRegen']['perLevel'],
-            response_data['manaRegen']['percentPerLevel'],
+            stats['manaRegen']['flat'],
+            stats['manaRegen']['percent'],
+            stats['manaRegen']['perLevel'],
+            stats['manaRegen']['percentPerLevel'],
 
-            response_data['armor']['flat'],
-            response_data['armor']['percent'],
-            response_data['armor']['perLevel'],
-            response_data['armor']['percentPerLevel'],
+            stats['armor']['flat'],
+            stats['armor']['percent'],
+            stats['armor']['perLevel'],
+            stats['armor']['percentPerLevel'],
 
-            response_data['magicResistance']['flat'],
-            response_data['magicResistance']['percent'],
-            response_data['magicResistance']['perLevel'],
-            response_data['magicResistance']['percentPerLevel'],
+            stats['magicResistance']['flat'],
+            stats['magicResistance']['percent'],
+            stats['magicResistance']['perLevel'],
+            stats['magicResistance']['percentPerLevel'],
 
-            response_data['attackDamage']['flat'],
-            response_data['attackDamage']['percent'],
-            response_data['attackDamage']['perLevel'],
-            response_data['attackDamage']['percentPerLevel'],
+            stats['attackDamage']['flat'],
+            stats['attackDamage']['percent'],
+            stats['attackDamage']['perLevel'],
+            stats['attackDamage']['percentPerLevel'],
 
-            response_data['movespeed']['flat'],
-            response_data['movespeed']['percent'],
-            response_data['movespeed']['perLevel'],
-            response_data['movespeed']['percentPerLevel'],
+            stats['movespeed']['flat'],
+            stats['movespeed']['percent'],
+            stats['movespeed']['perLevel'],
+            stats['movespeed']['percentPerLevel'],
 
-            response_data['acquisitionRadius']['flat'],
-            response_data['acquisitionRadius']['percent'],
-            response_data['acquisitionRadius']['perLevel'],
-            response_data['acquisitionRadius']['percentPerLevel'],
+            stats['acquisitionRadius']['flat'],
+            stats['acquisitionRadius']['percent'],
+            stats['acquisitionRadius']['perLevel'],
+            stats['acquisitionRadius']['percentPerLevel'],
 
-            response_data['selectionRadius']['flat'],
-            response_data['selectionRadius']['percent'],
-            response_data['selectionRadius']['perLevel'],
-            response_data['selectionRadius']['percentPerLevel'],
+            stats['selectionRadius']['flat'],
+            stats['selectionRadius']['percent'],
+            stats['selectionRadius']['perLevel'],
+            stats['selectionRadius']['percentPerLevel'],
 
-            response_data['pathingRadius']['flat'],
-            response_data['pathingRadius']['percent'],
-            response_data['pathingRadius']['perLevel'],
-            response_data['pathingRadius']['percentPerLevel'],
+            stats['pathingRadius']['flat'],
+            stats['pathingRadius']['percent'],
+            stats['pathingRadius']['perLevel'],
+            stats['pathingRadius']['percentPerLevel'],
 
-            response_data['gameplayRadius']['flat'],
-            response_data['gameplayRadius']['percent'],
-            response_data['gameplayRadius']['perLevel'],
-            response_data['gameplayRadius']['percentPerLevel'],
+            stats['gameplayRadius']['flat'],
+            stats['gameplayRadius']['percent'],
+            stats['gameplayRadius']['perLevel'],
+            stats['gameplayRadius']['percentPerLevel'],
 
-            response_data['criticalStrikeDamage']['flat'],
-            response_data['criticalStrikeDamage']['percent'],
-            response_data['criticalStrikeDamage']['perLevel'],
-            response_data['criticalStrikeDamage']['percentPerLevel'],
+            stats['criticalStrikeDamage']['flat'],
+            stats['criticalStrikeDamage']['percent'],
+            stats['criticalStrikeDamage']['perLevel'],
+            stats['criticalStrikeDamage']['percentPerLevel'],
 
-            response_data['criticalStrikeDamageModifier']['flat'],
-            response_data['criticalStrikeDamageModifier']['percent'],
-            response_data['criticalStrikeDamageModifier']['perLevel'],
-            response_data['criticalStrikeDamageModifier']['percentPerLevel'],
+            stats['criticalStrikeDamageModifier']['flat'],
+            stats['criticalStrikeDamageModifier']['percent'],
+            stats['criticalStrikeDamageModifier']['perLevel'],
+            stats['criticalStrikeDamageModifier']['percentPerLevel'],
 
-            response_data['attackSpeed']['flat'],
-            response_data['attackSpeed']['percent'],
-            response_data['attackSpeed']['perLevel'],
-            response_data['attackSpeed']['percentPerLevel'],
+            stats['attackSpeed']['flat'],
+            stats['attackSpeed']['percent'],
+            stats['attackSpeed']['perLevel'],
+            stats['attackSpeed']['percentPerLevel'],
 
-            response_data['attackSpeedRatio']['flat'],
-            response_data['attackSpeedRatio']['percent'],
-            response_data['attackSpeedRatio']['perLevel'],
-            response_data['attackSpeedRatio']['percentPerLevel'],
+            stats['attackSpeedRatio']['flat'],
+            stats['attackSpeedRatio']['percent'],
+            stats['attackSpeedRatio']['perLevel'],
+            stats['attackSpeedRatio']['percentPerLevel'],
 
-            response_data['attackCastTime']['flat'],
-            response_data['attackCastTime']['percent'],
-            response_data['attackCastTime']['perLevel'],
-            response_data['attackCastTime']['percentPerLevel'],
+            stats['attackCastTime']['flat'],
+            stats['attackCastTime']['percent'],
+            stats['attackCastTime']['perLevel'],
+            stats['attackCastTime']['percentPerLevel'],
 
-            response_data['attackTotalTime']['flat'],
-            response_data['attackTotalTime']['percent'],
-            response_data['attackTotalTime']['perLevel'],
-            response_data['attackTotalTime']['percentPerLevel'],
+            stats['attackTotalTime']['flat'],
+            stats['attackTotalTime']['percent'],
+            stats['attackTotalTime']['perLevel'],
+            stats['attackTotalTime']['percentPerLevel'],
 
-            response_data['attackDelayOffset']['flat'],
-            response_data['attackDelayOffset']['percent'],
-            response_data['attackDelayOffset']['perLevel'],
-            response_data['attackDelayOffset']['percentPerLevel'],
+            stats['attackDelayOffset']['flat'],
+            stats['attackDelayOffset']['percent'],
+            stats['attackDelayOffset']['perLevel'],
+            stats['attackDelayOffset']['percentPerLevel'],
 
-            response_data['attackRange']['flat'],
-            response_data['attackRange']['percent'],
-            response_data['attackRange']['perLevel'],
-            response_data['attackRange']['percentPerLevel'],
+            stats['attackRange']['flat'],
+            stats['attackRange']['percent'],
+            stats['attackRange']['perLevel'],
+            stats['attackRange']['percentPerLevel'],
 
         ]
         self._db_execute(insert_command, values)

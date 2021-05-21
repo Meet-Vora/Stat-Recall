@@ -2,41 +2,22 @@ from src.database.classes.champion_database import ChampionDatabase
 
 champ_db = ChampionDatabase()
 
+
+# Drop table(s)
+# champ_db.drop_champ_metadata_table()
+# champ_db.drop_champ_base_stats_table()
+
 # Create tables
-champ_db.create_champion_metadata_table()
+# champ_db.create_champion_metadata_table()
 champ_db.create_champion_base_stats_table()
-print("DONE CREATING 1")
 
 # Write all info to tables -- WORKS PERFECTLY!
 # champ_db.write_all_champions_metadata()
-# print("DONE WRITING 1")
-# champ_db.write_all_champions_stats()
-# print("DONE WRITING 2")
+champ_db.write_all_champions_base_stats()
 
 # Read all info in tables
-metadata = champ_db.get_some_champions_metadata(["Aatrox", "Zilean"])
-statdata = champ_db.get_some_champions_stats(["Aatrox", "Zilean"])
-
-print(metadata[0])
-print("====================================")
-print(statdata[0])
-
-# print("DONE READING")
-
-
-# def pretty(data, indent=0):
-#     for d in data:
-#         for key, value in d.items():
-#             print('\t' * indent + str(key))
-#             if isinstance(value, dict):
-#                 pretty(value, indent+1)
-#             else:
-#                 print('\t' * (indent+1) + str(value))
-#         print("-------------------------------------------")
-
-
-# pretty(metadata)
-# pretty(statdata)
+# metadata = champ_db.get_some_champions_metadata(["Aatrox", "Zilean"])
+# statdata = champ_db.get_some_champions_stats(["Aatrox", "Zilean"])
 
 
 # Close champ_db instance
