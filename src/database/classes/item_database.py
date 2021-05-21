@@ -13,7 +13,7 @@ class ItemDatabase(Database):
             __file__), '../../content/ddragon_item_list.json')
 
         self.base_url += "/items"
-        self.items = self.self.__read_all_items()
+        self.items = self.__read_all_items()
 
     def __read_all_items(self):
         with open(self.items_file_path, "r") as file:

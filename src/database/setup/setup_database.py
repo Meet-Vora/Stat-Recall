@@ -1,4 +1,4 @@
-from src.database.database import Database
+from src.database.classes.database import Database
 
 db = Database()
 
