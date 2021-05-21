@@ -183,11 +183,11 @@ class ChampionDatabase(Database):
 
         self._db_execute(insert_command, values)
 
-    def write_all_champions_stats(self):
+    def write_all_champions_base_stats(self):
         for champion_name in self.champion_names:
-            self.write_champion_stats(champion_name)
+            self.write_champion_base_stats(champion_name)
 
-    def write_champion_stats(self, champion_name):
+    def write_champion_base_stats(self, champion_name):
         key = self.__champion_http_request(champion_name)['key'].lower()
         response_data = self.__champion_http_request(champion_name)['stats']
         insert_command = """INSERT OR REPLACE INTO champion_base_stats VALUES
