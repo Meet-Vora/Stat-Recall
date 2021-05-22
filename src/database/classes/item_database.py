@@ -34,7 +34,7 @@ class ItemDatabase(Database):
 
     def create_item_metadata_table(self):
         schema = """
-        CREATE TABLE IF NOT EXISTS item_metadata 
+        CREATE TABLE IF NOT EXISTS item_metadata
         (
             id INTEGER NOT NULL PRIMARY KEY,
 
@@ -209,7 +209,7 @@ class ItemDatabase(Database):
         for item in self.items:
             self.write_item_metadata(int(item['id']))
 
-    def write_item_metadata(self, item_number):
+    def __write_item_metadata(self, item_number):
 
         response_data = self.__item_http_request(item_number)
         insert_command = "INSERT OR REPLACE INTO item_metadata VALUES (?, ?, ?, ?, ?, ?, ?)"
@@ -235,13 +235,13 @@ class ItemDatabase(Database):
             self.write_item_base_stats(int(item['id']))
             counter += 1
 
-    def write_item_base_stats(self, item_number):
+    def __write_item_base_stats(self, item_number):
         response_data = self.__item_http_request(item_number)
         item_id = response_data['id']
         stats = response_data['stats']
 
         insert_command = """
-        INSERT OR REPLACE INTO item_base_stats VALUES 
+        INSERT OR REPLACE INTO item_base_stats VALUES
         (
             ?,
             ?,?,?,?,?,?,
@@ -301,155 +301,36 @@ class ItemDatabase(Database):
                 for scale_type in stats[stat]:
                     values += [stats[stat][scale_type]]
 
-        # values = [
-        #     item_id,
-
-        #     stats['abilityPower']['flat'],
-        #     stats['abilityPower']['percent'],
-        #     stats['abilityPower']['perLevel'],
-        #     stats['abilityPower']['percentPerLevel'],
-        #     stats['abilityPower']['percentBase'],
-        #     stats['abilityPower']['percentBonus'],
-
-        #     stats['armor']['flat'],
-        #     stats['armor']['percent'],
-        #     stats['armor']['perLevel'],
-        #     stats['armor']['percentPerLevel'],
-        #     stats['armor']['percentBase'],
-        #     stats['armor']['percentBonus'],
-
-        #     stats['armorPenetration']['flat'],
-        #     stats['armorPenetration']['percent'],
-        #     stats['armorPenetration']['perLevel'],
-        #     stats['armorPenetration']['percentPerLevel'],
-        #     stats['armorPenetration']['percentBase'],
-        #     stats['armorPenetration']['percentBonus'],
-
-        #     stats['attackDamage']['flat'],
-        #     stats['attackDamage']['percent'],
-        #     stats['attackDamage']['perLevel'],
-        #     stats['attackDamage']['percentPerLevel'],
-        #     stats['attackDamage']['percentBase'],
-        #     stats['attackDamage']['percentBonus'],
-
-        #     stats['attackSpeed']['flat'],
-        #     stats['attackSpeed']['percent'],
-        #     stats['attackSpeed']['perLevel'],
-        #     stats['attackSpeed']['percentPerLevel'],
-        #     stats['attackSpeed']['percentBase'],
-        #     stats['attackSpeed']['percentBonus'],
-
-        #     stats['cooldownReduction']['flat'],
-        #     stats['cooldownReduction']['percent'],
-        #     stats['cooldownReduction']['perLevel'],
-        #     stats['cooldownReduction']['percentPerLevel'],
-        #     stats['cooldownReduction']['percentBase'],
-        #     stats['cooldownReduction']['percentBonus'],
-
-        #     stats['criticalStrikeChance']['flat'],
-        #     stats['criticalStrikeChance']['percent'],
-        #     stats['criticalStrikeChance']['perLevel'],
-        #     stats['criticalStrikeChance']['percentPerLevel'],
-        #     stats['criticalStrikeChance']['percentBase'],
-        #     stats['criticalStrikeChance']['percentBonus'],
-
-        #     stats['goldPer_10']['flat'],
-        #     stats['goldPer_10']['percent'],
-        #     stats['goldPer_10']['perLevel'],
-        #     stats['goldPer_10']['percentPerLevel'],
-        #     stats['goldPer_10']['percentBase'],
-        #     stats['goldPer_10']['percentBonus'],
-
-        #     stats['healAndShieldPower']['flat'],
-        #     stats['healAndShieldPower']['percent'],
-        #     stats['healAndShieldPower']['perLevel'],
-        #     stats['healAndShieldPower']['percentPerLevel'],
-        #     stats['healAndShieldPower']['percentBase'],
-        #     stats['healAndShieldPower']['percentBonus'],
-
-        #     stats['health']['flat'],
-        #     stats['health']['percent'],
-        #     stats['health']['perLevel'],
-        #     stats['health']['percentPerLevel'],
-        #     stats['health']['percentBase'],
-        #     stats['health']['percentBonus'],
-
-        #     stats['healthRegen']['flat'],
-        #     stats['healthRegen']['percent'],
-        #     stats['healthRegen']['perLevel'],
-        #     stats['healthRegen']['percentPerLevel'],
-        #     stats['healthRegen']['percentBase'],
-        #     stats['healthRegen']['percentBonus'],
-
-        #     stats['lethality']['flat'],
-        #     stats['lethality']['percent'],
-        #     stats['lethality']['perLevel'],
-        #     stats['lethality']['percentPerLevel'],
-        #     stats['lethality']['percentBase'],
-        #     stats['lethality']['percentBonus'],
-
-        #     stats['lifesteal']['flat'],
-        #     stats['lifesteal']['percent'],
-        #     stats['lifesteal']['perLevel'],
-        #     stats['lifesteal']['percentPerLevel'],
-        #     stats['lifesteal']['percentBase'],
-        #     stats['lifesteal']['percentBonus'],
-
-        #     stats['magicPenetration']['flat'],
-        #     stats['magicPenetration']['percent'],
-        #     stats['magicPenetration']['perLevel'],
-        #     stats['magicPenetration']['percentPerLevel'],
-        #     stats['magicPenetration']['percentBase'],
-        #     stats['magicPenetration']['percentBonus'],
-
-        #     stats['magicResistance']['flat'],
-        #     stats['magicResistance']['percent'],
-        #     stats['magicResistance']['perLevel'],
-        #     stats['magicResistance']['percentPerLevel'],
-        #     stats['magicResistance']['percentBase'],
-        #     stats['magicResistance']['percentBonus'],
-
-        #     stats['mana']['flat'],
-        #     stats['mana']['percent'],
-        #     stats['mana']['perLevel'],
-        #     stats['mana']['percentPerLevel'],
-        #     stats['mana']['percentBase'],
-        #     stats['mana']['percentBonus'],
-
-        #     stats['manaRegen']['flat'],
-        #     stats['manaRegen']['percent'],
-        #     stats['manaRegen']['perLevel'],
-        #     stats['manaRegen']['percentPerLevel'],
-        #     stats['manaRegen']['percentBase'],
-        #     stats['manaRegen']['percentBonus'],
-
-        #     stats['movespeed']['flat'],
-        #     stats['movespeed']['percent'],
-        #     stats['movespeed']['perLevel'],
-        #     stats['movespeed']['percentPerLevel'],
-        #     stats['movespeed']['percentBase'],
-        #     stats['movespeed']['percentBonus'],
-
-        #     stats['abilityHaste']['flat'],
-        #     stats['abilityHaste']['percent'],
-        #     stats['abilityHaste']['perLevel'],
-        #     stats['abilityHaste']['percentPerLevel'],
-        #     stats['abilityHaste']['percentBase'],
-        #     stats['abilityHaste']['percentBonus'],
-
-        #     stats['omnivamp']['flat'],
-        #     stats['omnivamp']['percent'],
-        #     stats['omnivamp']['perLevel'],
-        #     stats['omnivamp']['percentPerLevel'],
-        #     stats['omnivamp']['percentBase'],
-        #     stats['omnivamp']['percentBonus'],
-
-        #     stats['tenacity']['flat'],
-        #     stats['tenacity']['percent'],
-        #     stats['tenacity']['perLevel'],
-        #     stats['tenacity']['percentPerLevel'],
-        #     stats['tenacity']['percentBase'],
-        #     stats['tenacity']['percentBonus']
-
-        # ]
         self._db_execute(insert_command, values)
+
+    def get_some_items_metadata(self, item_numbers=[]):
+        data = []
+        if item_numbers:
+            for item_number in self.items:
+                data += [self.get_item_metadata(int(item_number))]
+        else:
+            for item in self.items:
+                data += [self.get_item_metadata(int(item['id']))]
+        return data
+
+    def __get_item_metadata(self, item_number):
+        select_command = "SELECT * FROM item_metadata WHERE id = ?"
+        self._db_execute(select_command, values=[item_number])
+        entry = self.cursor.fetchall()
+        return dict(entry[0])
+
+    def get_some_items_base_stats(self, item_numbers=[]):
+        data = []
+        if item_numbers:
+            for item_number in self.items:
+                data += [self.get_item_base_stats(int(item_number))]
+        else:
+            for item in self.items:
+                data += [self.get_item_base_stats(int(item['id']))]
+        return data
+
+    def __get_item_base_stats(self, item_number):
+        select_command = "SELECT * FROM item_base_stats WHERE id = ?"
+        self._db_execute(select_command, values=[item_number])
+        entry = self.cursor.fetchall()
+        return dict(entry[0])
