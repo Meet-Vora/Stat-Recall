@@ -17,7 +17,7 @@ class ItemDatabase(Database):
 
     def __read_all_items(self):
         with open(self.items_file_path, "r") as file:
-            return json.load(file)['items']
+            return json.load(file)
 
     def __item_http_request(self, item_number):
         # url_name = "MonkeyKing" if champion_name == "Wukong" else champion_name
@@ -303,34 +303,59 @@ class ItemDatabase(Database):
 
         self._db_execute(insert_command, values)
 
-    def get_some_items_metadata(self, item_numbers=[]):
+    def get_some_items_metadata_by_id(self, item_numbers=[]):
         data = []
-        if item_numbers:
-            for item_number in self.items:
-                data += [self.get_item_metadata(int(item_number))]
-        else:
-            for item in self.items:
-                data += [self.get_item_metadata(int(item['id']))]
+        if not item_numbers:
+            item_numbers = self.items.keys()
+
+        for item_number in item_numbers:
+            data += [self.__get_item(value=int(item_number),
+                                     table_name="item_metadata", search_key='id')]
+
         return data
 
-    def __get_item_metadata(self, item_number):
-        select_command = "SELECT * FROM item_metadata WHERE id = ?"
-        self._db_execute(select_command, values=[item_number])
+    def get_some_items_base_stats_by_id(self, item_numbers=[]):
+        data = []
+        if not item_numbers:
+            item_numbers = self.items.keys()
+
+        for item_number in item_numbers:
+            data += [self.__get_item(value=int(item_number),
+                                     table_name="item_base_stats", search_key='id')]
+
+        return data
+
+    def get_some_items_metadata_by_name(self, item_names=[]):
+        data = []
+        if not item_names:
+            item_names = list(self.items.values())
+
+        for item_name in item_names:
+            data += [self.__get_item(value=item_name,
+                                     table_name="item_metadata", search_key="name")]
+
+        return data
+
+    def get_some_items_base_stats_by_name(self, item_names=[]):
+        data = []
+        if not item_names:
+            item_names = list(self.items.values())
+
+        for item_name in item_names:
+            data += [self.__get_item(value=item_name,
+                                     table_name="item_base_stats", search_key="name")]
+
+        return data
+
+    def __get_item(self, value, table_name='item_metadata', search_key='id'):
+        select_command = "SELECT * FROM {0} WHERE {1} = ?".format(
+            table_name, search_key)
+        self._db_execute(select_command, values=[value])
         entry = self.cursor.fetchall()
         return dict(entry[0])
 
-    def get_some_items_base_stats(self, item_numbers=[]):
-        data = []
-        if item_numbers:
-            for item_number in self.items:
-                data += [self.get_item_base_stats(int(item_number))]
-        else:
-            for item in self.items:
-                data += [self.get_item_base_stats(int(item['id']))]
-        return data
-
-    def __get_item_base_stats(self, item_number):
-        select_command = "SELECT * FROM item_base_stats WHERE id = ?"
-        self._db_execute(select_command, values=[item_number])
-        entry = self.cursor.fetchall()
-        return dict(entry[0])
+    # def __get_item_base_stats(self, item_number):
+    #     select_command = "SELECT * FROM item_base_stats WHERE id = ?"
+    #     self._db_execute(select_command, values=[item_number])
+    #     entry = self.cursor.fetchall()
+    #     return dict(entry[0])
