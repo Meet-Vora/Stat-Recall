@@ -206,8 +206,8 @@ class ItemDatabase(Database):
         self._db_execute(schema)
 
     def write_all_items_metadata(self):
-        for item in self.items:
-            self.write_item_metadata(int(item['id']))
+        for item_number in self.items:
+            self.__write_item_metadata(int(item_number))
 
     def __write_item_metadata(self, item_number):
 
@@ -229,11 +229,8 @@ class ItemDatabase(Database):
         self._db_execute(insert_command, values)
 
     def write_all_items_base_stats(self):
-        counter = 0
-        for item in self.items:
-            print(counter, "|", item['id'])
-            self.write_item_base_stats(int(item['id']))
-            counter += 1
+        for item_number in self.items:
+            self.__write_item_base_stats(int(item_number))
 
     def __write_item_base_stats(self, item_number):
         response_data = self.__item_http_request(item_number)

@@ -9,11 +9,11 @@ champ_db = ChampionDatabase()
 
 # Create tables
 # champ_db.create_champion_metadata_table()
-champ_db.create_champion_base_stats_table()
+# champ_db.create_champion_base_stats_table()
 
 # Write all info to tables
-# champ_db.write_all_champions_metadata()
-# champ_db.write_all_champions_base_stats()
+champ_db.write_all_champions_metadata()
+champ_db.write_all_champions_base_stats()
 
 # Read all info in tables
 # metadata = champ_db.get_some_champions_metadata(["Aatrox", "Zilean"])
