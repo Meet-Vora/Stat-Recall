@@ -9,17 +9,25 @@ import json
 ddragon_url = "https://ddragon.leagueoflegends.com/cdn/11.10.1/data/en_US/item.json"
 response = requests.get(ddragon_url)
 item_json = response.json()['data']
-data_lst = []
+
+data = {}
 for item_number in item_json:
     item = item_json[item_number]
     if 'maps' in item and '11' in item['maps'] and item['maps']['11']:
-        data = {}
-        data['id'] = item_number
-        data['name'] = item['name']
-        data_lst += [data]
+        data[int(item_number)] = item['name']
+
+
+# data_lst = []
+# for item_number in item_json:
+#     item = item_json[item_number]
+#     if 'maps' in item and '11' in item['maps'] and item['maps']['11']:
+#         data = {}
+#         data['id'] = item_number
+#         data['name'] = item['name']
+#         data_lst += [data]
 
 with open(os.path.join(os.path.dirname(__file__), '../../content/ddragon_item_list.json'), "w+") as file:
-    json.dump({"items": data_lst}, file)
+    json.dump(data, file)
 
 
 ############### Requesting data from merakianalytics API ###############
