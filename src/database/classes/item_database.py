@@ -303,7 +303,7 @@ class ItemDatabase(Database):
     def get_some_items_metadata_by_id(self, item_numbers=[]):
         data = []
         if not item_numbers:
-            item_numbers = self.items.keys()
+            item_numbers = self.items
 
         for item_number in item_numbers:
             data += [self.__get_item(value=int(item_number),
@@ -314,7 +314,7 @@ class ItemDatabase(Database):
     def get_some_items_base_stats_by_id(self, item_numbers=[]):
         data = []
         if not item_numbers:
-            item_numbers = self.items.keys()
+            item_numbers = self.items
 
         for item_number in item_numbers:
             data += [self.__get_item(value=int(item_number),
@@ -325,22 +325,28 @@ class ItemDatabase(Database):
     def get_some_items_metadata_by_name(self, item_names=[]):
         data = []
         if not item_names:
-            item_names = list(self.items.values())
-
-        for item_name in item_names:
-            data += [self.__get_item(value=item_name,
-                                     table_name="item_metadata", search_key="name")]
+            for item_number in self.items:
+                item_name = self.items[item_number]
+                data += [self.__get_item(value=item_name,
+                                         table_name="item_metadata", search_key="name")]
+        else:
+            for item_name in item_names:
+                data += [self.__get_item(value=item_name,
+                                         table_name="item_metadata", search_key="name")]
 
         return data
 
     def get_some_items_base_stats_by_name(self, item_names=[]):
         data = []
         if not item_names:
-            item_names = list(self.items.values())
-
-        for item_name in item_names:
-            data += [self.__get_item(value=item_name,
-                                     table_name="item_base_stats", search_key="name")]
+            for item_number in self.items:
+                item_name = self.items[item_number]
+                data += [self.__get_item(value=item_name,
+                                         table_name="item_base_stats", search_key="name")]
+        else:
+            for item_name in item_names:
+                data += [self.__get_item(value=item_name,
+                                         table_name="item_base_stats", search_key="name")]
 
         return data
 
