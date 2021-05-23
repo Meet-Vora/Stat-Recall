@@ -370,6 +370,8 @@ class ChampionDatabase(Database):
         select_command = "SELECT * FROM champion_base_stats WHERE key = ?"
         self._db_execute(select_command, values=[champion_name.lower()])
         entry = self.cursor.fetchall()
+        if len(entry) == 0:
+            return None
         return dict(entry[0])
 
         # self._db_execute(select_command, values=[champion_name.lower()])

@@ -37,8 +37,8 @@ class ItemDatabase(Database):
         CREATE TABLE IF NOT EXISTS item_metadata
         (
             id INTEGER NOT NULL PRIMARY KEY,
-
             name TEXT NOT NULL,
+
             requiredChampion TEXT NOT NULL,
             requiredAlly TEXT NOT NULL,
 
@@ -54,6 +54,7 @@ class ItemDatabase(Database):
         CREATE TABLE IF NOT EXISTS item_base_stats
         (
             id INTEGER NOT NULL PRIMARY KEY,
+            name TEXT NOT NULL,
 
             abilityPowerFlat INTEGER NOT NULL,
             abilityPowerPercent INTEGER NOT NULL,
@@ -235,12 +236,13 @@ class ItemDatabase(Database):
     def __write_item_base_stats(self, item_number):
         response_data = self.__item_http_request(item_number)
         item_id = response_data['id']
+        item_name = response_data['name']
         stats = response_data['stats']
 
         insert_command = """
         INSERT OR REPLACE INTO item_base_stats VALUES
         (
-            ?,
+            ?,?,
             ?,?,?,?,?,?,
             ?,?,?,?,?,?,
             ?,?,?,?,?,?,
@@ -264,7 +266,7 @@ class ItemDatabase(Database):
             ?,?,?,?,?,?
         )
         """
-        values = [item_id]
+        values = [item_id, item_name]
         stat_types = [
             "abilityPower",
             "armor",
@@ -351,10 +353,21 @@ class ItemDatabase(Database):
         return data
 
     def __get_item(self, value, table_name='item_metadata', search_key='id'):
+        """
+        Gets an item from the specified database.
+        @param String/int value: item name or item id number
+        @param String table_name: name of table to read from
+        @param String search_key: field to search by
+        @returns: dictionary of item values iff entry present. Else, returns None
+        """
+
         select_command = "SELECT * FROM {0} WHERE {1} = ?".format(
             table_name, search_key)
         self._db_execute(select_command, values=[value])
         entry = self.cursor.fetchall()
+
+        if len(entry) == 0:
+            return None
         return dict(entry[0])
 
     # def __get_item_base_stats(self, item_number):

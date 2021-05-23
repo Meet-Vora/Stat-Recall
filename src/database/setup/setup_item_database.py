@@ -18,10 +18,12 @@ item_db = ItemDatabase()
 # print('done 3')
 
 # Read all info in tables
-item_metadata = item_db.get_some_items_metadata_by_id([])
-# item_statdata = item_db.get_some_items_base_stats_by_id(["Aatrox", "Zilean"])
+item_id_metadata = item_db.get_some_items_metadata_by_id([1001, 1004])
+item_name_statdata = item_db.get_some_items_base_stats_by_name(["B. F. Sword"])
 
-print(item_metadata)
+print(item_id_metadata)
+print("////////////////////////////////////")
+print(item_name_statdata)
 
 # Close item_db instance
 item_db.close()
